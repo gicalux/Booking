@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Water And Steam</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a; --dark: #111; --card: #181818; --border: #2a2a2a;
+    --accent: #c8a84b; --accent2: #e8c76a; --text: #e8e8e8; --muted: #777;
+    --white: #f5f5f5; --green: #4caf7d; --red: #e05555;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--black); color: var(--text); font-family: 'DM Sans', sans-serif; font-weight: 300; min-height: 100vh; }
+
+  /* ── LOGIN ── */
+  .login-screen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  .login-box {
+    background: var(--card); border: 1.5px solid var(--border); border-radius: 6px;
+    padding: 48px 40px; width: 100%; max-width: 380px; text-align: center;
+  }
+  .login-logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 3px; color: var(--white); margin-bottom: 4px; }
+  .login-logo span { color: var(--accent); }
+  .login-sub { font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 32px; }
+  .login-label { font-size: 0.68rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); display: block; text-align: left; margin-bottom: 8px; }
+  .login-input {
+    width: 100%; background: var(--dark); border: 1.5px solid var(--border); border-radius: 2px;
+    padding: 12px 16px; color: var(--white); font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem; outline: none; transition: border-color 0.2s; margin-bottom: 16px;
+  }
+  .login-input:focus { border-color: var(--accent); }
+  .login-error { color: var(--red); font-size: 0.78rem; margin-bottom: 12px; display: none; }
+
+  /* ── DASHBOARD ── */
+  .dashboard { display: none; }
+
+  header {
+    padding: 20px 40px; display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border); background: rgba(10,10,10,0.97);
+    position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px);
+  }
+  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 3px; color: var(--white); }
+  .logo span { color: var(--accent); }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .admin-badge {
+    font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase;
+    background: rgba(200,168,75,0.1); border: 1px solid rgba(200,168,75,0.3);
+    color: var(--accent); padding: 4px 10px; border-radius: 20px;
+  }
+  .logout-btn {
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    padding: 6px 14px; border-radius: 2px; cursor: pointer; font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; transition: all 0.2s;
+  }
+  .logout-btn:hover { border-color: var(--red); color: var(--red); }
+
+  .main { padding: 40px; }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px; margin-bottom: 40px;
+  }
+  .stat-card {
+    background: var(--card); border: 1.5px solid var(--border); border-radius: 4px;
+    padding: 20px 24px;
+  }
+  .stat-label { font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 2px; color: var(--white); }
+  .stat-value.gold { color: var(--accent); }
+
+  /* ── SECTION HEADER ── */
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
+  }
+  .section-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 3px; color: var(--white); }
+  .filter-tabs { display: flex; gap: 8px; }
+  .filter-tab {
+    padding: 6px 14px; border: 1px solid var(--border); border-radius: 2px;
+    font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--muted); cursor: pointer; transition: all 0.2s; background: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .filter-tab:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-tab.active { background: var(--accent); border-color: var(--accent); color: var(--black); font-weight: 500; }
+
+  /* ── BOOKINGS TABLE ── */
+  .bookings-wrap { overflow-x: auto; }
+  .bookings-table { width: 100%; border-collapse: collapse; }
+  .bookings-table th {
+    font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted);
+    padding: 10px 16px; text-align: left; border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .booking-row {
+    border-bottom: 1px solid rgba(42,42,42,0.5); transition: background 0.15s;
+    animation: fadeIn 0.3s ease;
+  }
+  .booking-row:hover { background: rgba(255,255,255,0.02); }
+  .booking-row td { padding: 14px 16px; font-size: 0.83rem; vertical-align: middle; }
+
+  @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+  .td-date { color: var(--white); font-weight: 500; white-space: nowrap; }
+  .td-time { color: var(--accent); font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 1px; }
+  .td-service { color: var(--text); }
+  .td-name { color: var(--white); }
+  .td-car { color: var(--muted); font-size: 0.78rem; }
+  .td-phone a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .td-phone a:hover { color: var(--accent); }
+  .td-price { color: var(--accent); font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 1px; white-space: nowrap; }
+
+  .status-badge {
+    font-size: 0.62rem; letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 20px; white-space: nowrap;
+  }
+  .status-upcoming { background: rgba(200,168,75,0.1); border: 1px solid rgba(200,168,75,0.3); color: var(--accent); }
+  .status-completed { background: rgba(76,175,125,0.1); border: 1px solid rgba(76,175,125,0.3); color: var(--green); }
+  .status-cancelled { background: rgba(224,85,85,0.1); border: 1px solid rgba(224,85,85,0.3); color: var(--red); }
+
+  .action-btn {
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    padding: 5px 12px; border-radius: 2px; cursor: pointer; font-size: 0.7rem;
+    letter-spacing: 1px; text-transform: uppercase; transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .action-btn.cancel:hover { border-color: var(--red); color: var(--red); }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center; padding: 60px 0; color: var(--muted);
+  }
+  .empty-icon { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.3; }
+  .empty-text { font-size: 0.85rem; letter-spacing: 0.5px; }
+
+  /* ── CONFIRM MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px); z-index: 1000;
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  .modal-overlay.hidden { display: none; }
+  .modal {
+    background: var(--card); border: 1.5px solid var(--border); border-radius: 6px;
+    padding: 36px; max-width: 380px; width: 100%; text-align: center;
+  }
+  .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; letter-spacing: 3px; color: var(--white); margin-bottom: 10px; }
+  .modal-sub { font-size: 0.83rem; color: var(--muted); line-height: 1.6; margin-bottom: 28px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: center; }
+
+  .btn {
+    padding: 12px 28px; font-family: 'DM Sans', sans-serif; font-size: 0.75rem;
+    letter-spacing: 2px; text-transform: uppercase; border-radius: 2px;
+    cursor: pointer; transition: all 0.2s; border: 1.5px solid transparent;
+  }
+  .btn-danger { background: var(--red); color: var(--white); font-weight: 500; }
+  .btn-danger:hover { opacity: 0.85; }
+  .btn-ghost { background: transparent; border-color: var(--border); color: var(--muted); }
+  .btn-ghost:hover { border-color: var(--muted); color: var(--white); }
+
+  @media (max-width: 600px) {
+    header { padding: 16px 20px; }
+    .main { padding: 24px 20px; }
+    .admin-badge { display: none; }
+  }
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Water <span>&</span> Steam</div>
+    <div class="login-sub">Admin Dashboard</div>
+    <label class="login-label">Password</label>
+    <input class="login-input" type="password" id="login-pw" placeholder="Enter password"
+      onkeydown="if(event.key==='Enter') doLogin()">
+    <div class="login-error" id="login-error">Incorrect password. Try again.</div>
+    <button class="btn btn-danger" style="width:100%;padding:13px;" onclick="doLogin()">Sign In →</button>
+  </div>
+</div>
+
+<!-- ── DASHBOARD ── -->
+<div class="dashboard" id="dashboard">
+
+  <header>
+    <div class="logo">Water <span>&</span> Steam</div>
+    <div class="header-right">
+      <div class="admin-badge">Admin</div>
+      <button class="logout-btn" onclick="doLogout()">Log Out</button>
+    </div>
+  </header>
+
+  <div class="main">
+
+    <!-- Stats -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-label">Total Bookings</div>
+        <div class="stat-value" id="stat-total">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Upcoming</div>
+        <div class="stat-value gold" id="stat-upcoming">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">This Week</div>
+        <div class="stat-value" id="stat-week">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Cancelled</div>
+        <div class="stat-value" id="stat-cancelled">0</div>
+      </div>
+    </div>
+
+    <!-- Bookings list -->
+    <div class="section-header">
+      <div class="section-title">Bookings</div>
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="setFilter('all', this)">All</button>
+        <button class="filter-tab" onclick="setFilter('upcoming', this)">Upcoming</button>
+        <button class="filter-tab" onclick="setFilter('cancelled', this)">Cancelled</button>
+      </div>
+    </div>
+
+    <div class="bookings-wrap">
+      <table class="bookings-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Service</th>
+            <th>Client</th>
+            <th>Vehicle</th>
+            <th>Price</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="bookings-body"></tbody>
+      </table>
+      <div class="empty-state" id="empty-state" style="display:none;">
+        <div class="empty-icon">📋</div>
+        <div class="empty-text">No bookings found</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── CANCEL MODAL ── -->
+<div class="modal-overlay hidden" id="cancel-modal">
+  <div class="modal">
+    <div class="modal-title">Cancel Booking?</div>
+    <div class="modal-sub" id="cancel-modal-sub">This will cancel the booking and free up the time slot.</div>
+    <div class="modal-actions">
+      <button class="btn btn-danger" onclick="confirmCancel()">Yes, Cancel</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Keep It</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ADMIN_PASSWORD = 'Password';
+let cancelDocId = null;
+let currentFilter = 'all';
+let allBookings = [];
+
+// ── FIREBASE ──
+const firebaseConfig = {
+  apiKey: "AIzaSyCQO4s718Q4HM1xsmI0jhw-uYEPonvMI14",
+  authDomain: "water-and-steam-257d0.firebaseapp.com",
+  projectId: "water-and-steam-257d0",
+  storageBucket: "water-and-steam-257d0.firebasestorage.app",
+  messagingSenderId: "661128146407",
+  appId: "1:661128146407:web:8f67e8fc86c2b1822c2142"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// ── LOGIN ──
+function doLogin() {
+  const pw = document.getElementById('login-pw').value;
+  if (pw === ADMIN_PASSWORD) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    loadBookings();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('login-pw').value = '';
+    document.getElementById('login-pw').focus();
+  }
+}
+
+function doLogout() {
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-pw').value = '';
+  document.getElementById('login-error').style.display = 'none';
+}
+
+// ── LOAD FROM FIRESTORE ──
+function loadBookings() {
+  document.getElementById('bookings-body').innerHTML = '';
+  document.getElementById('empty-state').style.display = 'none';
+
+  db.collection('bookings')
+    .orderBy('createdAt', 'desc')
+    .onSnapshot(snapshot => {
+      allBookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderDashboard();
+    }, err => {
+      console.error('Firestore error:', err);
+      document.getElementById('empty-state').style.display = 'block';
+      document.getElementById('empty-state').querySelector('.empty-text').textContent = 'Error loading bookings. Check Firestore rules.';
+    });
+}
+
+// ── RENDER ──
+function renderDashboard() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const upcoming = allBookings.filter(b => b.status !== 'cancelled' && new Date(b.date) >= today);
+  const cancelled = allBookings.filter(b => b.status === 'cancelled');
+  const thisWeek = allBookings.filter(b => {
+    const d = new Date(b.date);
+    const diff = (d - today) / 86400000;
+    return diff >= 0 && diff <= 7 && b.status !== 'cancelled';
+  });
+
+  document.getElementById('stat-total').textContent = allBookings.length;
+  document.getElementById('stat-upcoming').textContent = upcoming.length;
+  document.getElementById('stat-week').textContent = thisWeek.length;
+  document.getElementById('stat-cancelled').textContent = cancelled.length;
+  renderTable();
+}
+
+function renderTable() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  let filtered = [...allBookings];
+  if (currentFilter === 'upcoming') filtered = allBookings.filter(b => b.status !== 'cancelled' && new Date(b.date) >= today);
+  if (currentFilter === 'cancelled') filtered = allBookings.filter(b => b.status === 'cancelled');
+  filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  const tbody = document.getElementById('bookings-body');
+  const empty = document.getElementById('empty-state');
+  tbody.innerHTML = '';
+
+  if (filtered.length === 0) { empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  filtered.forEach(b => {
+    const isPast = new Date(b.date) < today;
+    const status = b.status === 'cancelled' ? 'cancelled' : isPast ? 'completed' : 'upcoming';
+    const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
+    const tr = document.createElement('tr');
+    tr.className = 'booking-row';
+    tr.innerHTML = `
+      <td class="td-date">${formatDate(b.date)}</td>
+      <td class="td-time">${b.time || '—'}</td>
+      <td class="td-service">${b.service || '—'}</td>
+      <td class="td-name">${b.name || '—'}</td>
+      <td class="td-car">${b.car || '—'}</td>
+      <td class="td-price">${b.price || '—'}</td>
+      <td><span class="status-badge status-${status}">${statusLabel}</span></td>
+      <td>${status !== 'cancelled' ? `<button class="action-btn cancel" onclick="openCancel('${b.id}', '${b.name}', '${b.date}', '${b.time}')">Cancel</button>` : '—'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  if (isNaN(d)) return dateStr;
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+}
+
+// ── CANCEL ──
+function openCancel(docId, name, date, time) {
+  cancelDocId = docId;
+  document.getElementById('cancel-modal-sub').textContent =
+    `Cancel booking for ${name} on ${formatDate(date)} at ${time}?`;
+  document.getElementById('cancel-modal').classList.remove('hidden');
+}
+
+async function confirmCancel() {
+  if (!cancelDocId) return;
+  try {
+    await db.collection('bookings').doc(cancelDocId).update({ status: 'cancelled' });
+  } catch(e) { console.error('Cancel error:', e); }
+  closeModal();
+}
+
+function closeModal() {
+  document.getElementById('cancel-modal').classList.add('hidden');
+  cancelDocId = null;
+}
+
+document.getElementById('login-pw').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+</script>
+</body>
+</html>

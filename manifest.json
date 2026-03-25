@@ -2,7 +2,7 @@
   "name": "Water & Steam — Book Now",
   "short_name": "Water & Steam",
   "description": "Book your car detailing appointment in Contern, Luxembourg.",
-  "start_url": "/book-now/",
+  "start_url": "/Booking/booking-v2.html",
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#0a0a0a",

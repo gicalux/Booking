@@ -416,6 +416,29 @@
   .lp-success { font-size: 0.78rem; color: var(--green); min-height: 20px; margin-bottom: 8px; }
   .lp-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 
+  /* ── MY BOOKINGS ── */
+  .my-bookings {
+    background: var(--card); border: 1.5px solid var(--border); border-radius: 4px;
+    padding: 20px 24px; margin-bottom: 24px; animation: fadeIn 0.3s ease;
+  }
+  .my-bookings-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 2px; color: var(--white); margin-bottom: 16px; }
+  .booking-item { padding: 12px 0; border-bottom: 1px solid rgba(42,42,42,0.5); display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .booking-item:last-child { border-bottom: none; }
+  .booking-item-info { display: flex; flex-direction: column; gap: 3px; }
+  .booking-item-service { font-size: 0.85rem; color: var(--white); font-weight: 500; }
+  .booking-item-date { font-size: 0.75rem; color: var(--muted); }
+  .booking-item-price { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; color: var(--accent); letter-spacing: 1px; }
+  .btn-cancel-booking {
+    background: none; border: 1px solid rgba(224,85,85,0.4); color: var(--red);
+    padding: 5px 12px; border-radius: 2px; cursor: pointer; font-size: 0.68rem;
+    letter-spacing: 1.5px; text-transform: uppercase; transition: all 0.2s; white-space: nowrap;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn-cancel-booking:hover { background: rgba(224,85,85,0.1); }
+  .btn-cancel-booking:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn-danger { background: var(--red); color: var(--white); border: none; font-weight: 500; }
+  .btn-danger:hover { opacity: 0.85; }
+
   /* ── MOBILE ── */
   @media (max-width: 640px) {
 
@@ -819,7 +842,24 @@
     </div>
   </div>
 
-  <!-- CONFIRMED + REGISTER -->
+  <!-- CANCEL PAGE -->
+  <div class="step-panel" id="step-cancel">
+    <div class="confirm-screen">
+      <div class="confirm-icon" style="border-color:var(--red); background:rgba(224,85,85,0.1);">
+        <svg viewBox="0 0 32 32" fill="none" stroke="var(--red)" stroke-width="2.5"><line x1="8" y1="8" x2="24" y2="24"/><line x1="24" y1="8" x2="8" y2="24"/></svg>
+      </div>
+      <div class="confirm-title" id="cancel-page-title">Cancel Booking</div>
+      <div class="confirm-sub" id="cancel-page-sub">Loading booking details...</div>
+      <div id="cancel-booking-details" class="summary-card" style="max-width:480px;margin:24px auto;text-align:left;display:none;"></div>
+      <div id="cancel-actions" style="display:none; margin-top:16px;">
+        <div class="btn-row" style="justify-content:center;">
+          <button class="btn btn-danger" id="btn-do-cancel" onclick="executeCancellation()">Yes, Cancel Booking</button>
+          <button class="btn btn-ghost" onclick="window.location.href=window.location.pathname">Keep Booking</button>
+        </div>
+      </div>
+      <div id="cancel-result" style="display:none;"></div>
+    </div>
+  </div>
   <div class="step-panel" id="step-confirmed">
     <div class="confirm-screen">
       <div class="confirm-icon">
@@ -1536,12 +1576,17 @@ async function confirmBooking() {
     car:      getCarValue() + ' — ' + getSizeLabel(),
     price:    state.price,
     notes:    document.getElementById('f-notes').value || 'None',
-    location: '2 Rue Edmond Reuter, L-5326 Contern, Luxembourg'
+    location: '2 Rue Edmond Reuter, L-5326 Contern, Luxembourg',
+    cancel_url: cancelUrl,
+    booking_id: bookingId
   };
 
   // ── Save booking to Firestore ──
+  const bookingId = generateBookingId();
+  const cancelUrl = `${window.location.href.split('?')[0]}?cancel=${bookingId}`;
   await saveBooking(state.date, state.time, state.duration || 90);
   await saveFullBooking({
+    bookingId,
     date:     state.date,
     time:     state.time,
     duration: state.duration || 90,
@@ -1961,6 +2006,7 @@ function doLogin() {
 
   closeLoginPanel();
   checkStep1();
+  loadMyBookings();
 
   const banner = document.getElementById('login-banner');
   banner.classList.add('signed-in');
@@ -2008,6 +2054,110 @@ function sendResetEmail() {
   }
   msgEl.className = 'lp-success';
   msgEl.textContent = currentLang === 'fr' ? 'Email envoyé ! Vérifiez votre boîte mail.' : 'Reset email sent! Check your inbox.';
+}
+
+// ── BOOKING ID ──
+function generateBookingId() {
+  return 'WS-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substr(2,4).toUpperCase();
+}
+
+// ── MY BOOKINGS (logged in clients) ──
+async function loadMyBookings() {
+  const email = loggedInEmail;
+  if (!email) return;
+  try {
+    const snap = await db.collection('bookings')
+      .where('email', '==', email)
+      .where('status', '==', 'upcoming')
+      .get();
+    const bookings = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const today = new Date();
+    if (bookings.length === 0) { const ex = document.getElementById('my-bookings-panel'); if(ex) ex.remove(); return; }
+    const panel = document.createElement('div');
+    panel.className = 'my-bookings';
+    panel.id = 'my-bookings-panel';
+    panel.innerHTML = `<div class="my-bookings-title">📋 ${currentLang === 'fr' ? 'Mes Réservations' : 'My Bookings'}</div>` +
+      bookings.sort((a,b) => new Date(a.date)-new Date(b.date)).map(b => {
+        const hoursUntil = (new Date(b.date) - today) / 36e5;
+        const canCancel = hoursUntil > 24;
+        return `<div class="booking-item">
+          <div class="booking-item-info">
+            <div class="booking-item-service">${b.service || '—'}</div>
+            <div class="booking-item-date">${b.date} · ${b.time}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="booking-item-price">${b.price || '—'}</div>
+            <button class="btn-cancel-booking" ${canCancel ? `onclick="cancelMyBooking('${b.id}','${b.service}','${b.date}','${b.time}')"` : 'disabled'}>
+              ${canCancel ? (currentLang==='fr'?'Annuler':'Cancel') : '< 24h'}
+            </button>
+          </div>
+        </div>`;
+      }).join('');
+    const existing = document.getElementById('my-bookings-panel');
+    if (existing) existing.remove();
+    document.getElementById('login-banner').insertAdjacentElement('afterend', panel);
+  } catch(e) { console.error('loadMyBookings:', e); }
+}
+
+async function cancelMyBooking(docId, service, date, time) {
+  if (!confirm(`${currentLang==='fr'?'Annuler':'Cancel'} ${service} ${currentLang==='fr'?'le':'on'} ${date} ${currentLang==='fr'?'à':'at'} ${time}?`)) return;
+  try {
+    await db.collection('bookings').doc(docId).update({ status: 'cancelled' });
+    if (cfg.ejsService && cfg.ejsTemplate && cfg.ejsPubkey) {
+      emailjs.send(cfg.ejsService, cfg.ejsTemplate, {
+        service: '⚠️ CANCELLED: ' + service, date, time,
+        name: (document.getElementById('f-fname').value||'') + ' ' + (document.getElementById('f-lname').value||''),
+        email: loggedInEmail, phone: '', car: '', price: '—', duration: '—',
+        notes: currentLang==='fr' ? 'Réservation annulée par le client.' : 'Booking cancelled by client.'
+      });
+    }
+    await loadMyBookings();
+  } catch(e) { console.error('cancelMyBooking:', e); }
+}
+
+// ── CANCEL VIA EMAIL LINK ──
+let cancelDocId = null;
+
+async function checkCancelLink() {
+  const params = new URLSearchParams(window.location.search);
+  const bookingId = params.get('cancel');
+  if (!bookingId) return;
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('step-cancel').classList.add('active');
+  try {
+    const snap = await db.collection('bookings').where('bookingId','==',bookingId).limit(1).get();
+    if (snap.empty) { document.getElementById('cancel-page-sub').textContent = currentLang==='fr'?'Réservation introuvable.':'Booking not found.'; return; }
+    const doc = snap.docs[0]; const b = doc.data(); cancelDocId = doc.id;
+    const hoursUntil = (new Date(b.date) - new Date()) / 36e5;
+    if (b.status === 'cancelled') { document.getElementById('cancel-page-sub').textContent = currentLang==='fr'?'Déjà annulée.':'Already cancelled.'; return; }
+    if (hoursUntil < 24) { document.getElementById('cancel-page-sub').textContent = currentLang==='fr'?'Annulation impossible moins de 24h avant.':'Cannot cancel less than 24h before.'; return; }
+    document.getElementById('cancel-page-sub').textContent = currentLang==='fr'?'Voulez-vous annuler cette réservation ?':'Do you want to cancel this booking?';
+    const details = document.getElementById('cancel-booking-details');
+    details.style.display = 'block';
+    details.innerHTML = `
+      <div class="summary-row"><div class="summary-key">Service</div><div class="summary-val">${b.service}</div></div>
+      <div class="summary-row"><div class="summary-key">Date</div><div class="summary-val">${b.date}</div></div>
+      <div class="summary-row"><div class="summary-key">Time</div><div class="summary-val">${b.time}</div></div>
+      <div class="summary-row"><div class="summary-key">Vehicle</div><div class="summary-val">${b.car}</div></div>
+      <div class="summary-row"><div class="summary-key">Price</div><div class="summary-val price">${b.price}</div></div>`;
+    document.getElementById('cancel-actions').style.display = 'block';
+  } catch(e) { document.getElementById('cancel-page-sub').textContent = 'Error loading booking.'; }
+}
+
+async function executeCancellation() {
+  if (!cancelDocId) return;
+  const btn = document.getElementById('btn-do-cancel');
+  btn.disabled = true; btn.textContent = '...';
+  try {
+    await db.collection('bookings').doc(cancelDocId).update({ status: 'cancelled' });
+    document.getElementById('cancel-actions').style.display = 'none';
+    document.getElementById('cancel-booking-details').style.display = 'none';
+    const result = document.getElementById('cancel-result'); result.style.display = 'block';
+    result.innerHTML = `<div style="color:var(--green);font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;margin-top:16px;">
+      ${currentLang==='fr'?'✓ Réservation annulée':'✓ Booking Cancelled'}</div>
+    <div style="color:var(--muted);font-size:0.82rem;margin-top:8px;">
+      ${currentLang==='fr'?'Votre créneau a été libéré.':'Your time slot has been freed up.'}</div>`;
+  } catch(e) { btn.disabled = false; btn.textContent = currentLang==='fr'?'Oui, annuler':'Yes, Cancel'; }
 }
 
 const ACCOUNTS_KEY = 'was_accounts';
@@ -2089,6 +2239,7 @@ document.getElementById('lang-fr').classList.toggle('active', savedLang === 'fr'
 applyTranslations();
 renderServiceCards();
 tryAutoFill();
+checkCancelLink();
 </script>
 <!-- PWA Service Worker -->
 <script>

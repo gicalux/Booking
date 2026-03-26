@@ -188,6 +188,13 @@
   .service-card:hover::after { transform: scaleX(1); }
   .service-card.selected { border-color: var(--accent); background: rgba(200,168,75,0.06); }
   .service-card.selected::after { transform: scaleX(1); }
+  .service-card.dimmed { opacity: 0.35; cursor: not-allowed; }
+  .service-card.dimmed:hover { transform: none; border-color: var(--border); }
+  .blocked-badge {
+    font-size: 0.6rem; letter-spacing: 1px; text-transform: uppercase;
+    background: rgba(224,85,85,0.1); border: 1px solid rgba(224,85,85,0.3);
+    color: var(--red); padding: 3px 8px; border-radius: 20px; white-space: nowrap;
+  }
 
   /* top row: tag + popular badge */
   .service-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
@@ -926,30 +933,60 @@ function goStep(n) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// ── PRICING MATRIX — €72/hour, by car size ──
+// S=Small, M=Medium, L=Large, XL=Extra Large
+const PRICING = {
+  'quick-int':  { S:{p:36,d:30},  M:{p:54,d:45},  L:{p:72,d:60},  XL:{p:72,d:60}  },
+  'int-ext':    { S:{p:30,d:25},  M:{p:36,d:30},  L:{p:42,d:35},  XL:{p:50,d:42}  },
+  'pro-ext':    { S:{p:40,d:33},  M:{p:52,d:43},  L:{p:62,d:52},  XL:{p:70,d:58}  },
+  'int-int':    { S:{p:72,d:60},  M:{p:96,d:80},  L:{p:120,d:100},XL:{p:144,d:120}},
+  'pro-int':    { S:{p:180,d:150},M:{p:216,d:180},L:{p:252,d:210},XL:{p:324,d:270}},
+};
+
+// Category groups — only 1 per group allowed
+const SERVICE_GROUPS = {
+  'quick-int': 'interior',
+  'int-int':   'interior',
+  'pro-int':   'interior',
+  'int-ext':   'exterior',
+  'pro-ext':   'exterior',
+};
+
+function getCurrentSizeCode() {
+  const val = document.getElementById('f-size') ? document.getElementById('f-size').value : '';
+  return val || 'S'; // default to Small if not set
+}
+
+function formatDur(mins) {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return h > 0 ? (m > 0 ? `${h}h ${m}min` : `${h}h`) : `${m}min`;
+}
+
 // ── SERVICE DEFINITIONS ──
 const SERVICES = {
   en: [
-    { key: 'quick-int', tag: 'Interior', name: 'Quick Interior', priceMin: 20, priceMax: 20, duration: 30, price: 'From €20', durLabel: '30 min',
+    { key: 'quick-int', tag: 'Interior', name: 'Quick Interior', popular: null,
       features: ['Quick vacuum cleaning','Dashboard dusting','Front window cleaning'] },
-    { key: 'int-ext', tag: 'Exterior', name: 'Intensive Exterior', priceMin: 60, priceMax: 60, duration: 90, price: 'From €60', durLabel: '1h 30min', popular: '⭐ Popular',
+    { key: 'int-ext',  tag: 'Exterior', name: 'Intensive Exterior', popular: '⭐ Popular',
       features: ['Pre-wash','Rim wash (special detergent)','Door & trunk contours','Manual wash + quick wax'] },
-    { key: 'int-int', tag: 'Interior', name: 'Intensive Interior', priceMin: 60, priceMax: 60, duration: 90, price: 'From €60', durLabel: '1h 30min', popular: '⭐ Popular',
+    { key: 'int-int',  tag: 'Interior', name: 'Intensive Interior', popular: '⭐ Popular',
       features: ['Central console cleaning','Stain removal','Carpets & mats refresh','Trunk + windows & mirrors'] },
-    { key: 'pro-ext', tag: 'Exterior PRO', name: 'Exterior PRO', priceMin: 100, priceMax: 100, duration: 120, price: 'From €100', durLabel: '2h',
+    { key: 'pro-ext',  tag: 'Exterior PRO', name: 'Exterior PRO', popular: null,
       features: ['Full body decontamination','Rim decontamination','All contours wash','Manual wash + quick wax'] },
-    { key: 'pro-int', tag: 'Interior PRO', name: 'Interior PRO', priceMin: 100, priceMax: 100, duration: 120, price: 'From €100', durLabel: '2h',
+    { key: 'pro-int',  tag: 'Interior PRO', name: 'Interior PRO', popular: null,
       features: ['Deep vacuum & dashboard wash','Full carpet & mat shampooing','Seat shampooing & stain removal','Trunk + windows & mirrors'] },
   ],
   fr: [
-    { key: 'quick-int', tag: 'Intérieur', name: 'Intérieur Rapide', priceMin: 20, priceMax: 20, duration: 30, price: 'À partir de €20', durLabel: '30 min',
+    { key: 'quick-int', tag: 'Intérieur', name: 'Intérieur Rapide', popular: null,
       features: ['Aspirateur rapide','Dépoussiérage tableau de bord','Nettoyage vitres avant'] },
-    { key: 'int-ext', tag: 'Extérieur', name: 'Extérieur Intensif', priceMin: 60, priceMax: 60, duration: 90, price: 'À partir de €60', durLabel: '1h 30min', popular: '⭐ Populaire',
+    { key: 'int-ext',  tag: 'Extérieur', name: 'Extérieur Intensif', popular: '⭐ Populaire',
       features: ['Prélavage','Lavage jantes (détergent spécial)','Contours portières & coffre','Lavage manuel + cirage rapide'] },
-    { key: 'int-int', tag: 'Intérieur', name: 'Intérieur Intensif', priceMin: 60, priceMax: 60, duration: 90, price: 'À partir de €60', durLabel: '1h 30min', popular: '⭐ Populaire',
+    { key: 'int-int',  tag: 'Intérieur', name: 'Intérieur Intensif', popular: '⭐ Populaire',
       features: ['Nettoyage console centrale','Enlèvement des taches','Rafraîchissement tapis & moquettes','Coffre + vitres & miroirs'] },
-    { key: 'pro-ext', tag: 'Extérieur PRO', name: 'Extérieur PRO', priceMin: 100, priceMax: 100, duration: 120, price: 'À partir de €100', durLabel: '2h',
+    { key: 'pro-ext',  tag: 'Extérieur PRO', name: 'Extérieur PRO', popular: null,
       features: ['Décontamination carrosserie','Décontamination jantes','Lavage tous contours','Lavage manuel + cirage rapide'] },
-    { key: 'pro-int', tag: 'Intérieur PRO', name: 'Intérieur PRO', priceMin: 100, priceMax: 100, duration: 120, price: 'À partir de €100', durLabel: '2h',
+    { key: 'pro-int',  tag: 'Intérieur PRO', name: 'Intérieur PRO', popular: null,
       features: ['Aspirateur profond & tableau de bord','Shampouinage tapis & moquettes','Shampouinage sièges & taches','Coffre + vitres & miroirs'] },
   ]
 };
@@ -961,52 +998,81 @@ function renderServiceCards() {
   const grid = document.getElementById('services-grid');
   if (!grid) return;
   const services = SERVICES[currentLang] || SERVICES['en'];
+  const sizeCode = getCurrentSizeCode();
+  const selectedGroups = Object.keys(selectedServices).map(k => SERVICE_GROUPS[k]);
+
   grid.innerHTML = '';
   services.forEach(s => {
     const wasSelected = selectedServices[s.key];
+    const pricing = PRICING[s.key][sizeCode] || PRICING[s.key]['S'];
+    const group = SERVICE_GROUPS[s.key];
+    const groupTaken = selectedGroups.includes(group) && !wasSelected;
+
+    const priceLabel = currentLang === 'fr' ? `À partir de €${pricing.p}` : `From €${pricing.p}`;
+    const durLabel = formatDur(pricing.d);
+
     const div = document.createElement('div');
-    div.className = 'service-card' + (wasSelected ? ' selected' : '');
+    div.className = 'service-card' + (wasSelected ? ' selected' : '') + (groupTaken ? ' dimmed' : '');
     div.setAttribute('data-key', s.key);
     div.setAttribute('data-name', s.name);
-    div.setAttribute('data-price-min', s.priceMin);
-    div.setAttribute('data-price-max', s.priceMax);
-    div.setAttribute('data-duration', s.duration);
-    div.onclick = function() { toggleService(this); };
+    div.setAttribute('data-price-min', pricing.p);
+    div.setAttribute('data-price-max', pricing.p);
+    div.setAttribute('data-duration', pricing.d);
+    if (!groupTaken) div.onclick = function() { toggleService(this); };
+
     div.innerHTML = `
       <div class="check-badge">${checkSvg}</div>
       <div class="service-card-top">
         <div class="service-tag">${s.tag}</div>
         ${s.popular ? `<div class="popular-badge">${s.popular}</div>` : ''}
+        ${groupTaken ? `<div class="blocked-badge">${currentLang === 'fr' ? '✕ Déjà choisi' : '✕ Category taken'}</div>` : ''}
       </div>
       <div class="service-name">${s.name}</div>
       <ul class="service-features">${s.features.map(f => `<li>${f}</li>`).join('')}</ul>
       <div class="service-card-bottom">
-        <div class="service-price">${s.price}</div>
-        <div class="service-duration">${clockSvg}${s.durLabel}</div>
+        <div class="service-price">${priceLabel}</div>
+        <div class="service-duration">${clockSvg}${durLabel}</div>
       </div>
     `;
     grid.appendChild(div);
-    if (wasSelected) selectedServices[s.key].name = s.name;
+    if (wasSelected) {
+      selectedServices[s.key].name = s.name;
+      selectedServices[s.key].priceMin = pricing.p;
+      selectedServices[s.key].priceMax = pricing.p;
+      selectedServices[s.key].duration = pricing.d;
+    }
   });
 }
 
-// ── STEP 1 — multi-select ──
+// ── STEP 2 — service selection ──
 const selectedServices = {};
 
 function toggleService(el) {
   const key = el.dataset.key;
+  const group = SERVICE_GROUPS[key];
+  const sizeCode = getCurrentSizeCode();
+  const pricing = PRICING[key][sizeCode] || PRICING[key]['S'];
+
   if (selectedServices[key]) {
+    // Deselect
     delete selectedServices[key];
     el.classList.remove('selected');
   } else {
+    // Deselect any other service in the same group first
+    Object.keys(selectedServices).forEach(k => {
+      if (SERVICE_GROUPS[k] === group) {
+        delete selectedServices[k];
+      }
+    });
     selectedServices[key] = {
       name:     el.dataset.name,
-      priceMin: parseInt(el.dataset.priceMin),
-      priceMax: parseInt(el.dataset.priceMax),
-      duration: parseInt(el.dataset.duration)
+      priceMin: pricing.p,
+      priceMax: pricing.p,
+      duration: pricing.d
     };
     el.classList.add('selected');
   }
+  renderServiceCards();
   updateSelectionBar();
 }
 
@@ -1397,6 +1463,9 @@ function onModelChange() {
     const sizeCode = CAR_MODELS[brand][model]; // S, M, L, XL
     sizeEl.value = sizeCode;
     sizeEl.style.color = 'var(--accent)';
+    // Update service card prices live
+    renderServiceCards();
+    updateSelectionBar();
   } else {
     sizeEl.value = '';
     sizeEl.style.color = '';

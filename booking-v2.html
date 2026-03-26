@@ -428,7 +428,14 @@
   .booking-item-service { font-size: 0.85rem; color: var(--white); font-weight: 500; }
   .booking-item-date { font-size: 0.75rem; color: var(--muted); }
   .booking-item-price { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; color: var(--accent); letter-spacing: 1px; }
-  .btn-cancel-booking {
+  .btn-reschedule-booking {
+    background: none; border: 1px solid rgba(200,168,75,0.4); color: var(--accent);
+    padding: 5px 12px; border-radius: 2px; cursor: pointer; font-size: 0.68rem;
+    letter-spacing: 1.5px; text-transform: uppercase; transition: all 0.2s; white-space: nowrap;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn-reschedule-booking:hover { background: rgba(200,168,75,0.1); }
+  .btn-reschedule-booking:disabled { opacity: 0.3; cursor: not-allowed; }
     background: none; border: 1px solid rgba(224,85,85,0.4); color: var(--red);
     padding: 5px 12px; border-radius: 2px; cursor: pointer; font-size: 0.68rem;
     letter-spacing: 1.5px; text-transform: uppercase; transition: all 0.2s; white-space: nowrap;
@@ -852,8 +859,9 @@
       <div class="confirm-sub" id="cancel-page-sub">Loading booking details...</div>
       <div id="cancel-booking-details" class="summary-card" style="max-width:480px;margin:24px auto;text-align:left;display:none;"></div>
       <div id="cancel-actions" style="display:none; margin-top:16px;">
-        <div class="btn-row" style="justify-content:center;">
-          <button class="btn btn-danger" id="btn-do-cancel" onclick="executeCancellation()">Yes, Cancel Booking</button>
+        <div class="btn-row" style="justify-content:center; flex-wrap:wrap;">
+          <button class="btn btn-primary" id="btn-do-reschedule" onclick="executeReschedule()">📅 Reschedule</button>
+          <button class="btn btn-danger" id="btn-do-cancel" onclick="executeCancellation()">✕ Cancel Booking</button>
           <button class="btn btn-ghost" onclick="window.location.href=window.location.pathname">Keep Booking</button>
         </div>
       </div>
@@ -1582,7 +1590,8 @@ async function confirmBooking() {
     notes:    document.getElementById('f-notes').value || 'None',
     location: '2 Rue Edmond Reuter, L-5326 Contern, Luxembourg',
     cancel_url: cancelUrl,
-    booking_id: bookingId
+    booking_id: bookingId,
+    reschedule_url: `${window.location.href.split('?')[0]}?reschedule=${bookingId}`
   };
 
   // ── Save booking to Firestore ──
@@ -2087,10 +2096,13 @@ async function loadMyBookings() {
             <div class="booking-item-service">${b.service || '—'}</div>
             <div class="booking-item-date">${b.date} · ${b.time}</div>
           </div>
-          <div style="display:flex;align-items:center;gap:10px;">
+          <div style="display:flex;align-items:center;gap:8px;">
             <div class="booking-item-price">${b.price || '—'}</div>
+            <button class="btn-reschedule-booking" ${canCancel ? `onclick="rescheduleMyBooking('${b.id}','${b.service}','${b.date}','${b.time}')"` : 'disabled'} title="${canCancel ? '' : (currentLang==='fr'?'Impossible moins de 24h avant':'Cannot reschedule less than 24h before')}">
+              ${canCancel ? (currentLang==='fr'?'📅 Reporter':'📅 Reschedule') : '< 24h'}
+            </button>
             <button class="btn-cancel-booking" ${canCancel ? `onclick="cancelMyBooking('${b.id}','${b.service}','${b.date}','${b.time}')"` : 'disabled'}>
-              ${canCancel ? (currentLang==='fr'?'Annuler':'Cancel') : '< 24h'}
+              ${canCancel ? (currentLang==='fr'?'✕ Annuler':'✕ Cancel') : '< 24h'}
             </button>
           </div>
         </div>`;
@@ -2117,23 +2129,94 @@ async function cancelMyBooking(docId, service, date, time) {
   } catch(e) { console.error('cancelMyBooking:', e); }
 }
 
-// ── CANCEL VIA EMAIL LINK ──
+// ── RESCHEDULE ──
+let rescheduleDocId = null;
+let rescheduleData = null;
+
+async function rescheduleMyBooking(docId, service, date, time) {
+  if (!confirm(`${currentLang==='fr'?'Reporter':'Reschedule'} ${service} ${currentLang==='fr'?'le':'on'} ${date} ${currentLang==='fr'?'à':'at'} ${time}?`)) return;
+  try {
+    // Cancel old booking
+    await db.collection('bookings').doc(docId).update({ status: 'cancelled' });
+    // Remove panel
+    const panel = document.getElementById('my-bookings-panel');
+    if (panel) panel.remove();
+    // Go to date picker — keep service/details, just reset date/time
+    state.date = null; state.dateObj = null; state.time = null;
+    document.getElementById('btn-step3').disabled = true;
+    goStep(3);
+    // Show reschedule notice
+    const sub = document.getElementById('s3-sub');
+    sub.textContent = currentLang === 'fr'
+      ? '📅 Choisissez un nouveau créneau pour votre réservation'
+      : '📅 Pick a new date & time for your appointment';
+    sub.style.color = 'var(--accent)';
+  } catch(e) { console.error('rescheduleMyBooking:', e); }
+}
+
+async function executeReschedule() {
+  if (!cancelDocId) return;
+  try {
+    // Get booking data before cancelling
+    const snap = await db.collection('bookings').doc(cancelDocId).get();
+    const b = snap.data();
+    // Cancel old slot
+    await db.collection('bookings').doc(cancelDocId).update({ status: 'cancelled' });
+    // Pre-fill form with old booking data
+    document.getElementById('f-fname').value = (b.name || '').split(' ')[0];
+    document.getElementById('f-lname').value = (b.name || '').split(' ').slice(1).join(' ');
+    document.getElementById('f-email').value = b.email || '';
+    document.getElementById('f-phone').value = b.phone || '';
+    // Go to date picker
+    state.date = null; state.dateObj = null; state.time = null;
+    document.getElementById('btn-step3').disabled = true;
+    document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('step-3').classList.add('active');
+    const sub = document.getElementById('s3-sub');
+    sub.textContent = currentLang === 'fr'
+      ? '📅 Choisissez un nouveau créneau'
+      : '📅 Pick a new date & time';
+    sub.style.color = 'var(--accent)';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch(e) { console.error('executeReschedule:', e); }
+}
+
+
 let cancelDocId = null;
 
 async function checkCancelLink() {
   const params = new URLSearchParams(window.location.search);
-  const bookingId = params.get('cancel');
+  const bookingId = params.get('cancel') || params.get('reschedule');
+  const isReschedule = !!params.get('reschedule');
   if (!bookingId) return;
+
   document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
   document.getElementById('step-cancel').classList.add('active');
+  document.getElementById('cancel-page-title').textContent = isReschedule
+    ? (currentLang==='fr' ? 'Reporter le Rendez-vous' : 'Reschedule Appointment')
+    : (currentLang==='fr' ? 'Annuler la Réservation' : 'Cancel Booking');
+
+  // Hide reschedule button if this is cancel-only
+  const rescheduleBtn = document.getElementById('btn-do-reschedule');
+  if (!isReschedule && rescheduleBtn) rescheduleBtn.style.display = 'none';
+  const cancelBtn = document.getElementById('btn-do-cancel');
+  if (isReschedule && cancelBtn) cancelBtn.style.display = 'none';
+
   try {
     const snap = await db.collection('bookings').where('bookingId','==',bookingId).limit(1).get();
     if (snap.empty) { document.getElementById('cancel-page-sub').textContent = currentLang==='fr'?'Réservation introuvable.':'Booking not found.'; return; }
     const doc = snap.docs[0]; const b = doc.data(); cancelDocId = doc.id;
     const hoursUntil = (new Date(b.date) - new Date()) / 36e5;
     if (b.status === 'cancelled') { document.getElementById('cancel-page-sub').textContent = currentLang==='fr'?'Déjà annulée.':'Already cancelled.'; return; }
-    if (hoursUntil < 24) { document.getElementById('cancel-page-sub').textContent = currentLang==='fr'?'Annulation impossible moins de 24h avant.':'Cannot cancel less than 24h before.'; return; }
-    document.getElementById('cancel-page-sub').textContent = currentLang==='fr'?'Voulez-vous annuler cette réservation ?':'Do you want to cancel this booking?';
+    if (hoursUntil < 24) {
+      document.getElementById('cancel-page-sub').textContent = currentLang==='fr'
+        ?'Modification impossible moins de 24h avant le rendez-vous.'
+        :'Changes not possible less than 24h before the appointment.';
+      return;
+    }
+    document.getElementById('cancel-page-sub').textContent = isReschedule
+      ? (currentLang==='fr'?'Voulez-vous choisir un nouveau créneau ?':'Would you like to pick a new date & time?')
+      : (currentLang==='fr'?'Voulez-vous annuler cette réservation ?':'Do you want to cancel this booking?');
     const details = document.getElementById('cancel-booking-details');
     details.style.display = 'block';
     details.innerHTML = `

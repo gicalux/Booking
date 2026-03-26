@@ -1578,9 +1578,18 @@ async function confirmBooking() {
   const durM = totalDur % 60;
   const durStr = durH > 0 ? (durM > 0 ? `${durH}h ${durM}min` : `${durH}h`) : `${durM}min`;
 
-  // Generate booking ID first
+  // Generate booking ID and calendar data first
   const bookingId = generateBookingId();
   const cancelUrl = `${window.location.href.split('?')[0]}?cancel=${bookingId}`;
+  const rescheduleUrl = `${window.location.href.split('?')[0]}?reschedule=${bookingId}`;
+
+  const icsBooking = {
+    date: state.date, time: state.time, duration: state.duration || 90,
+    service: state.service, car: getCarValue() + ' — ' + getSizeLabel(),
+    price: state.price, bookingId, cancelUrl
+  };
+  lastICSData = generateICS(icsBooking);
+  const calLink = generateCalendarLink(icsBooking);
 
   const bookingData = {
     service:  state.service,
@@ -1596,18 +1605,11 @@ async function confirmBooking() {
     location: '2 Rue Edmond Reuter, L-5326 Contern, Luxembourg',
     cancel_url: cancelUrl,
     booking_id: bookingId,
-    reschedule_url: `${window.location.href.split('?')[0]}?reschedule=${bookingId}`,
+    reschedule_url: rescheduleUrl,
     cal_link: calLink
   };
 
-  // ── Generate ICS calendar file ──
-  const icsBooking = {
-    date: state.date, time: state.time, duration: state.duration || 90,
-    service: state.service, car: getCarValue() + ' — ' + getSizeLabel(),
-    price: state.price, bookingId, cancelUrl
-  };
-  lastICSData = generateICS(icsBooking);
-  const calLink = generateCalendarLink(icsBooking);
+  // ── Save booking to Firestore ──
   await saveBooking(state.date, state.time, state.duration || 90);
   await saveFullBooking({
     bookingId,

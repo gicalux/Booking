@@ -876,6 +876,11 @@
       <div class="confirm-title" id="confirmed-title">Booking Received!</div>
       <div class="confirm-sub" id="confirmed-sub">Your appointment has been submitted. We will be in touch to confirm shortly.</div>
       <div class="confirm-chips" id="confirm-chips"></div>
+      <div style="margin-top:20px;">
+        <button class="btn btn-primary" id="btn-add-calendar" onclick="downloadICS()" style="display:none;">
+          📅 Add to My Calendar
+        </button>
+      </div>
     </div>
     <div class="register-card" id="register-card">
       <div class="register-header">
@@ -1591,10 +1596,18 @@ async function confirmBooking() {
     location: '2 Rue Edmond Reuter, L-5326 Contern, Luxembourg',
     cancel_url: cancelUrl,
     booking_id: bookingId,
-    reschedule_url: `${window.location.href.split('?')[0]}?reschedule=${bookingId}`
+    reschedule_url: `${window.location.href.split('?')[0]}?reschedule=${bookingId}`,
+    cal_link: calLink
   };
 
-  // ── Save booking to Firestore ──
+  // ── Generate ICS calendar file ──
+  const icsBooking = {
+    date: state.date, time: state.time, duration: state.duration || 90,
+    service: state.service, car: getCarValue() + ' — ' + getSizeLabel(),
+    price: state.price, bookingId, cancelUrl
+  };
+  lastICSData = generateICS(icsBooking);
+  const calLink = generateCalendarLink(icsBooking);
   await saveBooking(state.date, state.time, state.duration || 90);
   await saveFullBooking({
     bookingId,
@@ -1665,6 +1678,13 @@ async function confirmBooking() {
   if (results.calendar === 'added')     chips.innerHTML += `<div class="confirm-chip sent">✓ Calendar blocked</div>`;
   if (results.calendar === 'failed')    chips.innerHTML += `<div class="confirm-chip failed">✗ Calendar failed</div>`;
   if (!results.email && !results.emailCustomer && !results.calendar) chips.innerHTML += `<div class="confirm-chip">Configure integrations in ⚙ Setup</div>`;
+
+  // Show Add to Calendar button
+  const calBtn = document.getElementById('btn-add-calendar');
+  if (calBtn) {
+    calBtn.style.display = 'inline-block';
+    calBtn.textContent = currentLang === 'fr' ? '📅 Ajouter à mon Calendrier' : '📅 Add to My Calendar';
+  }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -2067,7 +2087,89 @@ function sendResetEmail() {
   msgEl.textContent = currentLang === 'fr' ? 'Email envoyé ! Vérifiez votre boîte mail.' : 'Reset email sent! Check your inbox.';
 }
 
-// ── BOOKING ID ──
+// ── ICS CALENDAR ──
+let lastICSData = null;
+
+function generateICS(booking) {
+  // Parse date and time
+  const dateParts = new Date(booking.date);
+  const [hour, min] = booking.time.split(':').map(Number);
+  dateParts.setHours(hour, min, 0);
+
+  const endDate = new Date(dateParts.getTime() + (booking.duration || 90) * 60000);
+
+  function fmt(d) {
+    return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  }
+
+  // 48h and 24h reminders
+  const uid = booking.bookingId || generateBookingId();
+  const now = fmt(new Date());
+  const start = fmt(dateParts);
+  const end = fmt(endDate);
+
+  const ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Water & Steam//Booking//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    `UID:${uid}@waterandsteam`,
+    `DTSTAMP:${now}`,
+    `DTSTART:${start}`,
+    `DTEND:${end}`,
+    `SUMMARY:🚗 ${booking.service} — Water & Steam`,
+    `DESCRIPTION:Service: ${booking.service}\\nVehicle: ${booking.car}\\nPrice: ${booking.price}\\n\\nCancel/Reschedule: ${booking.cancelUrl || ''}`,
+    'LOCATION:2 Rue Edmond Reuter\\, L-5326 Contern\\, Luxembourg',
+    'BEGIN:VALARM',
+    'TRIGGER:-PT48H',
+    'ACTION:DISPLAY',
+    `DESCRIPTION:Reminder: ${booking.service} tomorrow at Water & Steam`,
+    'END:VALARM',
+    'BEGIN:VALARM',
+    'TRIGGER:-PT24H',
+    'ACTION:DISPLAY',
+    `DESCRIPTION:Reminder: ${booking.service} tomorrow at Water & Steam`,
+    'END:VALARM',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+
+  return ics;
+}
+
+function downloadICS() {
+  if (!lastICSData) return;
+  const blob = new Blob([lastICSData], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'water-and-steam-booking.ics';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function generateCalendarLink(booking) {
+  // Also generate a Google Calendar link as fallback
+  const dateParts = new Date(booking.date);
+  const [hour, min] = booking.time.split(':').map(Number);
+  dateParts.setHours(hour, min, 0);
+  const endDate = new Date(dateParts.getTime() + (booking.duration || 90) * 60000);
+  const fmt = d => d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: `🚗 ${booking.service} — Water & Steam`,
+    dates: `${fmt(dateParts)}/${fmt(endDate)}`,
+    details: `Service: ${booking.service}\nVehicle: ${booking.car}\nPrice: ${booking.price}`,
+    location: '2 Rue Edmond Reuter, L-5326 Contern, Luxembourg'
+  });
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
+
 function generateBookingId() {
   return 'WS-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substr(2,4).toUpperCase();
 }

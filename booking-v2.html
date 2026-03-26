@@ -1565,6 +1565,10 @@ async function confirmBooking() {
   const durM = totalDur % 60;
   const durStr = durH > 0 ? (durM > 0 ? `${durH}h ${durM}min` : `${durH}h`) : `${durM}min`;
 
+  // Generate booking ID first
+  const bookingId = generateBookingId();
+  const cancelUrl = `${window.location.href.split('?')[0]}?cancel=${bookingId}`;
+
   const bookingData = {
     service:  state.service,
     date:     state.date,
@@ -1582,8 +1586,6 @@ async function confirmBooking() {
   };
 
   // ── Save booking to Firestore ──
-  const bookingId = generateBookingId();
-  const cancelUrl = `${window.location.href.split('?')[0]}?cancel=${bookingId}`;
   await saveBooking(state.date, state.time, state.duration || 90);
   await saveFullBooking({
     bookingId,

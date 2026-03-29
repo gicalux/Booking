@@ -2301,52 +2301,84 @@ let rescheduleDocId = null;
 let rescheduleData = null;
 
 async function rescheduleMyBooking(docId, service, date, time) {
-  if (!confirm(`${currentLang==='fr'?'Reporter':'Reschedule'} ${service} ${currentLang==='fr'?'le':'on'} ${date} ${currentLang==='fr'?'à':'at'} ${time}?`)) return;
+  // Show confirm first
+  const isFr = currentLang === 'fr';
+  if (!confirm(isFr
+    ? `Reporter votre réservation du ${date} à ${time} ?\nVous choisirez une nouvelle date.`
+    : `Reschedule your booking on ${date} at ${time}?\nYou will pick a new date.`)) return;
+
   try {
+    // Get full booking data before cancelling
+    const snap = await db.collection('bookings').doc(docId).get();
+    const b = snap.data();
+
     // Cancel old booking
     await db.collection('bookings').doc(docId).update({ status: 'cancelled' });
+
     // Free up old slot in localStorage
     const local = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
     const updated = local.filter(s => !(s.date === date && s.time === time));
     localStorage.setItem(BOOKINGS_KEY, JSON.stringify(updated));
-    // Remove panel
+
+    // Keep all state — only reset date/time
+    state.date = null;
+    state.dateObj = null;
+    state.time = null;
+    document.getElementById('btn-step3').disabled = true;
+
+    // Remove My Bookings panel
     const panel = document.getElementById('my-bookings-panel');
     if (panel) panel.remove();
-    // Go to date picker — keep service/details, just reset date/time
-    state.date = null; state.dateObj = null; state.time = null;
-    document.getElementById('btn-step3').disabled = true;
+
+    // Go to Step 3 (date picker) — service and details stay intact
     goStep(3);
+
     // Show reschedule notice
     const sub = document.getElementById('s3-sub');
-    sub.textContent = currentLang === 'fr'
-      ? '📅 Choisissez un nouveau créneau pour votre réservation'
-      : '📅 Pick a new date & time for your appointment';
+    sub.textContent = isFr
+      ? '📅 Choisissez une nouvelle date pour : ' + (b.service || service)
+      : '📅 Pick a new date & time for: ' + (b.service || service);
     sub.style.color = 'var(--accent)';
+
   } catch(e) { console.error('rescheduleMyBooking:', e); }
 }
 
 async function executeReschedule() {
   if (!cancelDocId) return;
   try {
-    // Get booking data before cancelling
+    // Get full booking data
     const snap = await db.collection('bookings').doc(cancelDocId).get();
     const b = snap.data();
+
     // Cancel old slot
     await db.collection('bookings').doc(cancelDocId).update({ status: 'cancelled' });
-    // Pre-fill form with old booking data
-    document.getElementById('f-fname').value = (b.name || '').split(' ')[0];
-    document.getElementById('f-lname').value = (b.name || '').split(' ').slice(1).join(' ');
-    document.getElementById('f-email').value = b.email || '';
-    document.getElementById('f-phone').value = b.phone || '';
-    // Go to date picker
+
+    // Free up slot in localStorage
+    const local = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
+    const updated = local.filter(s => !(s.date === b.date && s.time === b.time));
+    localStorage.setItem(BOOKINGS_KEY, JSON.stringify(updated));
+
+    // Pre-fill form with original booking data
+    if (b.name) {
+      const parts = b.name.split(' ');
+      document.getElementById('f-fname').value = parts[0] || '';
+      document.getElementById('f-lname').value = parts.slice(1).join(' ') || '';
+    }
+    if (b.email) document.getElementById('f-email').value = b.email;
+    if (b.phone) document.getElementById('f-phone').value = b.phone;
+
+    // Keep state — only reset date/time
     state.date = null; state.dateObj = null; state.time = null;
     document.getElementById('btn-step3').disabled = true;
+
+    // Go to Step 3
     document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('step-3').classList.add('active');
+
     const sub = document.getElementById('s3-sub');
     sub.textContent = currentLang === 'fr'
-      ? '📅 Choisissez un nouveau créneau'
-      : '📅 Pick a new date & time';
+      ? '📅 Choisissez une nouvelle date pour : ' + (b.service || '')
+      : '📅 Pick a new date & time for: ' + (b.service || '');
     sub.style.color = 'var(--accent)';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch(e) { console.error('executeReschedule:', e); }

@@ -177,10 +177,13 @@
   <div class="login-box">
     <div class="login-logo">Water <span>&</span> Steam</div>
     <div class="login-sub">Admin Dashboard</div>
-    <label class="login-label">Password</label>
-    <input class="login-input" type="password" id="login-pw" placeholder="Enter password"
+    <label class="login-label">Username</label>
+    <input class="login-input" type="text" id="login-user" placeholder="Username"
       onkeydown="if(event.key==='Enter') doLogin()">
-    <div class="login-error" id="login-error">Incorrect password. Try again.</div>
+    <label class="login-label">Password</label>
+    <input class="login-input" type="password" id="login-pw" placeholder="Password"
+      onkeydown="if(event.key==='Enter') doLogin()">
+    <div class="login-error" id="login-error">Incorrect username or password.</div>
     <button class="btn btn-danger" style="width:100%;padding:13px;" onclick="doLogin()">Sign In →</button>
   </div>
 </div>
@@ -266,7 +269,8 @@
 </div>
 
 <script>
-const ADMIN_PASSWORD = 'Password';
+const ADMIN_USERNAME = 'Carwash';
+const ADMIN_PASSWORD = 'tankuk-ruxMov';
 let cancelDocId = null;
 let currentFilter = 'all';
 let allBookings = [];
@@ -285,8 +289,9 @@ const db = firebase.firestore();
 
 // ── LOGIN ──
 function doLogin() {
+  const user = document.getElementById('login-user').value;
   const pw = document.getElementById('login-pw').value;
-  if (pw === ADMIN_PASSWORD) {
+  if (user === ADMIN_USERNAME && pw === ADMIN_PASSWORD) {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
     loadBookings();
@@ -410,6 +415,9 @@ function closeModal() {
 }
 
 document.getElementById('login-pw').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+document.getElementById('login-user').addEventListener('keydown', e => {
   if (e.key === 'Enter') doLogin();
 });
 </script>

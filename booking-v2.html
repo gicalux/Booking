@@ -1281,10 +1281,11 @@ async function isSlotBlocked(dateStr, slotTime, slotDuration) {
   try {
     const snap = await db.collection('bookings')
       .where('date', '==', dateStr)
-      .where('status', '!=', 'cancelled')
       .get();
     for (const doc of snap.docs) {
       const b = doc.data();
+      // Skip cancelled bookings
+      if (b.status === 'cancelled') continue;
       const bStart = toMins(b.time);
       const bEnd = bStart + (b.duration || 90) + BUFFER;
       if (slotStart < bEnd && slotEnd > bStart) return true;
@@ -2268,6 +2269,12 @@ async function confirmCancelModal() {
   btn.disabled = true;
   try {
     await db.collection('bookings').doc(cancelModalDocId).update({ status: 'cancelled' });
+    // Free up the slot in localStorage too
+    if (cancelModalData) {
+      const local = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
+      const updated = local.filter(s => !(s.date === cancelModalData.date && s.time === cancelModalData.time));
+      localStorage.setItem(BOOKINGS_KEY, JSON.stringify(updated));
+    }
     if (cfg.ejsService && cfg.ejsTemplate && cfg.ejsPubkey && cancelModalData) {
       emailjs.send(cfg.ejsService, cfg.ejsTemplate, {
         service: '⚠️ CANCELLED: ' + cancelModalData.service,
@@ -2298,6 +2305,10 @@ async function rescheduleMyBooking(docId, service, date, time) {
   try {
     // Cancel old booking
     await db.collection('bookings').doc(docId).update({ status: 'cancelled' });
+    // Free up old slot in localStorage
+    const local = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
+    const updated = local.filter(s => !(s.date === date && s.time === time));
+    localStorage.setItem(BOOKINGS_KEY, JSON.stringify(updated));
     // Remove panel
     const panel = document.getElementById('my-bookings-panel');
     if (panel) panel.remove();
@@ -2395,7 +2406,14 @@ async function executeCancellation() {
   btn.disabled = true; btn.textContent = '...';
   try {
     await db.collection('bookings').doc(cancelDocId).update({ status: 'cancelled' });
-    document.getElementById('cancel-actions').style.display = 'none';
+    // Free up slot in localStorage
+    const bSnap = await db.collection('bookings').doc(cancelDocId).get();
+    if (bSnap.exists) {
+      const bData = bSnap.data();
+      const local = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
+      const updated = local.filter(s => !(s.date === bData.date && s.time === bData.time));
+      localStorage.setItem(BOOKINGS_KEY, JSON.stringify(updated));
+    }
     document.getElementById('cancel-booking-details').style.display = 'none';
     const result = document.getElementById('cancel-result'); result.style.display = 'block';
     result.innerHTML = `<div style="color:var(--green);font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;margin-top:16px;">

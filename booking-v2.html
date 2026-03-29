@@ -911,6 +911,24 @@
     </div>
   </div>
 
+<!-- ── CANCEL CONFIRM MODAL ── -->
+<div class="modal-overlay hidden" id="cancel-confirm-modal">
+  <div class="modal" style="text-align:center; max-width:400px;">
+    <div style="font-size:2.5rem; margin-bottom:16px;">⚠️</div>
+    <div class="modal-title" id="ccm-title">Cancel Booking?</div>
+    <div class="modal-sub" id="ccm-sub">This will free up your time slot. This cannot be undone.</div>
+    <div id="ccm-details" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:4px;padding:16px;margin:16px 0;text-align:left;font-size:0.82rem;color:var(--muted);line-height:1.8;"></div>
+    <div class="modal-actions" style="justify-content:center;">
+      <button class="btn" style="background:var(--red);color:white;border-color:var(--red);" onclick="confirmCancelModal()" id="ccm-confirm-btn">
+        <span id="ccm-confirm-text">✕ Yes, Cancel</span>
+      </button>
+      <button class="btn btn-ghost" onclick="closeCancelModal()" id="ccm-keep-btn">
+        <span id="ccm-keep-text">Keep Booking</span>
+      </button>
+    </div>
+  </div>
+</div>
+
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ── CONFIG ──
 const CFG_KEY = 'was_booking_config';
@@ -2205,7 +2223,7 @@ async function loadMyBookings() {
             <button class="btn-reschedule-booking" ${canCancel ? `onclick="rescheduleMyBooking('${b.id}','${b.service}','${b.date}','${b.time}')"` : 'disabled'} title="${canCancel ? '' : (currentLang==='fr'?'Impossible moins de 24h avant':'Cannot reschedule less than 24h before')}">
               ${canCancel ? (currentLang==='fr'?'📅 Reporter':'📅 Reschedule') : '< 24h'}
             </button>
-            <button class="btn-cancel-booking" ${canCancel ? `onclick="cancelMyBooking('${b.id}','${b.service}','${b.date}','${b.time}')"` : 'disabled'}>
+            <button class="btn-cancel-booking" ${canCancel ? `onclick="cancelMyBooking('${b.id}','${b.service}','${b.date}','${b.time}','${b.price||''}')"` : 'disabled'}>
               ${canCancel ? (currentLang==='fr'?'✕ Annuler':'✕ Cancel') : '< 24h'}
             </button>
           </div>
@@ -2217,20 +2235,58 @@ async function loadMyBookings() {
   } catch(e) { console.error('loadMyBookings:', e); }
 }
 
-async function cancelMyBooking(docId, service, date, time) {
-  if (!confirm(`${currentLang==='fr'?'Annuler':'Cancel'} ${service} ${currentLang==='fr'?'le':'on'} ${date} ${currentLang==='fr'?'à':'at'} ${time}?`)) return;
+// ── CANCEL CONFIRM MODAL ──
+let cancelModalDocId = null;
+let cancelModalData = null;
+
+function openCancelModal(docId, service, date, time, price) {
+  cancelModalDocId = docId;
+  cancelModalData = { docId, service, date, time };
+  const isFr = currentLang === 'fr';
+  document.getElementById('ccm-title').textContent = isFr ? 'Annuler la réservation ?' : 'Cancel Booking?';
+  document.getElementById('ccm-sub').textContent = isFr
+    ? 'Votre créneau sera libéré. Cette action est irréversible.'
+    : 'Your time slot will be freed. This cannot be undone.';
+  document.getElementById('ccm-details').innerHTML = `
+    <b>${service}</b><br>
+    📅 ${date} · ${time}<br>
+    💶 ${price || '—'}
+  `;
+  document.getElementById('ccm-confirm-text').textContent = isFr ? '✕ Oui, annuler' : '✕ Yes, Cancel';
+  document.getElementById('ccm-keep-text').textContent = isFr ? 'Garder' : 'Keep Booking';
+  document.getElementById('cancel-confirm-modal').classList.remove('hidden');
+}
+
+function closeCancelModal() {
+  document.getElementById('cancel-confirm-modal').classList.add('hidden');
+  cancelModalDocId = null;
+}
+
+async function confirmCancelModal() {
+  if (!cancelModalDocId) return;
+  const btn = document.getElementById('ccm-confirm-btn');
+  btn.disabled = true;
   try {
-    await db.collection('bookings').doc(docId).update({ status: 'cancelled' });
-    if (cfg.ejsService && cfg.ejsTemplate && cfg.ejsPubkey) {
+    await db.collection('bookings').doc(cancelModalDocId).update({ status: 'cancelled' });
+    if (cfg.ejsService && cfg.ejsTemplate && cfg.ejsPubkey && cancelModalData) {
       emailjs.send(cfg.ejsService, cfg.ejsTemplate, {
-        service: '⚠️ CANCELLED: ' + service, date, time,
+        service: '⚠️ CANCELLED: ' + cancelModalData.service,
+        date: cancelModalData.date, time: cancelModalData.time,
         name: (document.getElementById('f-fname').value||'') + ' ' + (document.getElementById('f-lname').value||''),
         email: loggedInEmail, phone: '', car: '', price: '—', duration: '—',
         notes: currentLang==='fr' ? 'Réservation annulée par le client.' : 'Booking cancelled by client.'
       });
     }
+    closeCancelModal();
     await loadMyBookings();
-  } catch(e) { console.error('cancelMyBooking:', e); }
+  } catch(e) {
+    console.error('confirmCancelModal:', e);
+    btn.disabled = false;
+  }
+}
+
+async function cancelMyBooking(docId, service, date, time, price) {
+  openCancelModal(docId, service, date, time, price);
 }
 
 // ── RESCHEDULE ──

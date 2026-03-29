@@ -307,7 +307,7 @@
   .summary-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid rgba(42,42,42,0.5); }
   .summary-row:last-child { border-bottom: none; }
   .summary-key { font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
-  .summary-val { font-size: 0.9rem; color: var(--white); text-align: right; max-width: 60%; }
+  .summary-val { font-size: 0.9rem; color: var(--white); text-align: right; max-width: 60%; white-space: pre-line; }
   .summary-val.price { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; color: var(--accent); letter-spacing: 2px; }
 
   /* ── INTEGRATION STATUS ── */
@@ -413,7 +413,6 @@
   .lp-sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 4px; line-height: 1.6; }
   .lp-error { font-size: 0.78rem; color: var(--red); min-height: 20px; margin-bottom: 8px; }
   .lp-success { font-size: 0.78rem; color: var(--green); min-height: 20px; margin-bottom: 8px; }
-  .lp-success { font-size: 0.78rem; color: var(--green); min-height: 20px; margin-bottom: 8px; }
   .lp-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 
   /* ── MY BOOKINGS ── */
@@ -436,6 +435,7 @@
   }
   .btn-reschedule-booking:hover { background: rgba(200,168,75,0.1); }
   .btn-reschedule-booking:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn-cancel-booking {
     background: none; border: 1px solid rgba(224,85,85,0.4); color: var(--red);
     padding: 5px 12px; border-radius: 2px; cursor: pointer; font-size: 0.68rem;
     letter-spacing: 1.5px; text-transform: uppercase; transition: all 0.2s; white-space: nowrap;
@@ -702,7 +702,7 @@
         <div id="fp-msg" class="lp-error"></div>
         <div class="lp-actions">
           <button class="btn btn-primary" onclick="sendResetEmail()">Send Reset Link</button>
-          <button class="btn btn-ghost" onclick="showLogin()">← Back to Sign In</button>
+          <button class="btn btn-ghost" onclick="showLoginForm()">← Back to Sign In</button>
         </div>
       </div>
 
@@ -1384,7 +1384,7 @@ const CAR_MODELS = {
     'X4':'L','X5':'L','X6':'L','X7':'L','Z4':'S','M2':'S','M3':'M','M4':'M',
     'M5':'M','iX':'L','i4':'M','i7':'M'
   },
-  'Citroën': {
+  'Citroen': {
     'C1':'S','C3':'S','C3 Aircross':'L','C4':'M','C4 X':'M',
     'C5 Aircross':'L','C5 X':'L','Berlingo':'XL','SpaceTourer':'XL'
   },
@@ -1469,7 +1469,7 @@ const CAR_MODELS = {
   'Seat': {
     'Ibiza':'S','Leon':'S','Arona':'S','Ateca':'L','Tarraco':'L','Alhambra':'XL'
   },
-  'Škoda': {
+  'Skoda': {
     'Fabia':'S','Octavia':'M','Superb':'M','Kamiq':'S','Karoq':'L','Kodiaq':'L','Enyaq':'L'
   },
   'Subaru': {
@@ -1629,7 +1629,6 @@ async function confirmBooking() {
   };
 
   // ── Save booking to Firestore ──
-  await saveBooking(state.date, state.time, state.duration || 90);
   await saveFullBooking({
     bookingId,
     date:     state.date,
@@ -1642,7 +1641,12 @@ async function confirmBooking() {
     email:    document.getElementById('f-email').value,
     car:      getCarValue() + ' — ' + getSizeLabel(),
     notes:    document.getElementById('f-notes').value || '',
+    status:   'upcoming'
   });
+  // Also save to localStorage for offline slot blocking
+  const localBookings = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
+  localBookings.push({ date: state.date, time: state.time, duration: state.duration || 90 });
+  localStorage.setItem(BOOKINGS_KEY, JSON.stringify(localBookings));
   // Save email for auto-fill next visit
   localStorage.setItem('was_last_email', document.getElementById('f-email').value.trim());
 

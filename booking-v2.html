@@ -1826,7 +1826,7 @@ const T = {
     loginBannerText: 'Returning client? Sign in to pre-fill your details.',
     loginBannerBtn: 'Sign In',
     signOut: 'Sign Out',
-    popular: '⭐ Popular', back: '← Back',
+    popular: '⭐ Popular',
   },
   fr: {
     back: '← Retour au site',
@@ -1890,7 +1890,7 @@ const T = {
     loginBannerText: 'Client habituel ? Connectez-vous pour pré-remplir.',
     loginBannerBtn: 'Se connecter',
     signOut: 'Se déconnecter',
-    popular: '⭐ Populaire', back: '← Retour',
+    popular: '⭐ Populaire',
   }
 };
 
@@ -2101,11 +2101,14 @@ function sendResetEmail() {
   if (!accounts[email]) {
     msgEl.className = 'lp-error'; msgEl.textContent = currentLang === 'fr' ? 'Aucun compte trouvé.' : 'No account found with this email.'; return;
   }
-  if (cfg.ejsService && cfg.ejsPubkey) {
-    emailjs.send(cfg.ejsService, cfg.ejsTemplate, {
+  if (cfg.ejsService && cfg.ejsTemplateCustomer && cfg.ejsPubkey) {
+    emailjs.send(cfg.ejsService, cfg.ejsTemplateCustomer, {
       name: accounts[email].fname || email, email, service: 'Password Reset',
       date: new Date().toLocaleDateString(), time: '—', duration: '—', price: '—', car: '—',
-      notes: 'Password reset requested for this account. Please contact the client directly.'
+      cancel_url: '', reschedule_url: '', cal_link: '', booking_id: '',
+      notes: currentLang === 'fr'
+        ? 'Demande de réinitialisation de mot de passe. Veuillez contacter Water & Steam directement.'
+        : 'Password reset requested. Please contact Water & Steam directly.'
     });
   }
   msgEl.className = 'lp-success';
@@ -2455,7 +2458,10 @@ async function rescheduleMyBooking(docId, service, date, time) {
 }
 
 async function executeReschedule() {
-  if (!cancelDocId) return;
+  if (!cancelDocId) {
+    console.warn('No booking to reschedule');
+    return;
+  }
   try {
     // Get full booking data
     const snap = await db.collection('bookings').doc(cancelDocId).get();

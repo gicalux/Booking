@@ -1279,12 +1279,12 @@ async function isSlotBlocked(dateStr, slotTime, slotDuration) {
   const slotEnd = slotStart + slotDuration + BUFFER;
 
   try {
+    // Force fresh data from server, bypass cache
     const snap = await db.collection('bookings')
       .where('date', '==', dateStr)
-      .get();
+      .get({ source: 'server' });
     for (const doc of snap.docs) {
       const b = doc.data();
-      // Skip cancelled bookings
       if (b.status === 'cancelled') continue;
       const bStart = toMins(b.time);
       const bEnd = bStart + (b.duration || 90) + BUFFER;
@@ -2108,7 +2108,77 @@ function sendResetEmail() {
   msgEl.textContent = currentLang === 'fr' ? 'Email envoyé ! Vérifiez votre boîte mail.' : 'Reset email sent! Check your inbox.';
 }
 
-// ── ICS CALENDAR ──
+function generateCancellationICS(booking) {
+  const dateParts = new Date(booking.date || new Date());
+  const [hour, min] = (booking.time || '9:00').split(':').map(Number);
+  dateParts.setHours(hour, min, 0);
+  const endDate = new Date(dateParts.getTime() + (booking.duration || 90) * 60000);
+  const fmt = d => d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+  const uid = (booking.bookingId || generateBookingId()) + '@waterandsteam';
+
+  return [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Water & Steam//Booking//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:CANCEL',
+    'BEGIN:VEVENT',
+    `UID:${uid}`,
+    `DTSTAMP:${fmt(new Date())}`,
+    `DTSTART:${fmt(dateParts)}`,
+    `DTEND:${fmt(endDate)}`,
+    `SUMMARY:❌ CANCELLED — ${booking.service || 'Water & Steam'}`,
+    'STATUS:CANCELLED',
+    'SEQUENCE:1',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+}
+
+function createICSDownloadUrl(icsContent) {
+  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+  return URL.createObjectURL(blob);
+}
+
+function showCancelICSButton(url, icsContent) {
+  // Show a floating download button after cancellation
+  const isFr = currentLang === 'fr';
+  const existing = document.getElementById('cancel-ics-banner');
+  if (existing) existing.remove();
+
+  const banner = document.createElement('div');
+  banner.id = 'cancel-ics-banner';
+  banner.style.cssText = `
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+    background:var(--card); border:1.5px solid var(--accent); border-radius:4px;
+    padding:16px 24px; z-index:9999; text-align:center;
+    box-shadow:0 8px 32px rgba(0,0,0,0.4); max-width:340px; width:90%;
+    animation: fadeIn 0.3s ease;
+  `;
+  banner.innerHTML = `
+    <div style="font-size:0.72rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">
+      ${isFr ? 'Supprimer de votre calendrier' : 'Remove from your calendar'}
+    </div>
+    <a href="${url}" download="cancel-water-steam.ics" style="
+      display:inline-block; background:var(--accent); color:var(--black);
+      padding:10px 20px; border-radius:3px; text-decoration:none;
+      font-size:0.78rem; letter-spacing:1.5px; text-transform:uppercase; font-weight:500;
+    ">📅 ${isFr ? 'Télécharger le fichier' : 'Download Calendar File'}</a>
+    <div style="font-size:0.72rem;color:var(--muted);margin-top:8px;">
+      ${isFr ? 'Ouvrez ce fichier pour supprimer l\'événement' : 'Open this file to remove the event'}
+    </div>
+    <button onclick="this.parentElement.remove()" style="
+      position:absolute;top:8px;right:12px;background:none;border:none;
+      color:var(--muted);cursor:pointer;font-size:1rem;
+    ">×</button>
+  `;
+  document.body.appendChild(banner);
+
+  // Auto remove after 30 seconds
+  setTimeout(() => { if (banner.parentElement) banner.remove(); }, 30000);
+}
+
+
 let lastICSData = null;
 
 function generateICS(booking) {
@@ -2268,23 +2338,60 @@ async function confirmCancelModal() {
   const btn = document.getElementById('ccm-confirm-btn');
   btn.disabled = true;
   try {
+    // Get full booking data for cancellation email
+    const snap = await db.collection('bookings').doc(cancelModalDocId).get();
+    const b = snap.data() || {};
+
     await db.collection('bookings').doc(cancelModalDocId).update({ status: 'cancelled' });
+
     // Free up the slot in localStorage too
     if (cancelModalData) {
       const local = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
       const updated = local.filter(s => !(s.date === cancelModalData.date && s.time === cancelModalData.time));
       localStorage.setItem(BOOKINGS_KEY, JSON.stringify(updated));
     }
+
+    // Generate cancellation ICS
+    const cancelICS = generateCancellationICS(b);
+    const cancelICSUrl = createICSDownloadUrl(cancelICS);
+
+    // Send cancellation email to client
+    if (cfg.ejsService && cfg.ejsTemplateCustomer && cfg.ejsPubkey && (b.email || loggedInEmail)) {
+      emailjs.send(cfg.ejsService, cfg.ejsTemplateCustomer, {
+        service: '❌ ' + (b.service || cancelModalData.service),
+        date: b.date || cancelModalData.date,
+        time: b.time || cancelModalData.time,
+        duration: '—', price: b.price || '—',
+        name: b.name || ((document.getElementById('f-fname').value||'') + ' ' + (document.getElementById('f-lname').value||'')),
+        email: b.email || loggedInEmail,
+        phone: b.phone || '',
+        car: b.car || '—',
+        notes: (currentLang==='fr'
+          ? '❌ Votre réservation a été annulée.\n\nPour supprimer cet événement de votre calendrier, téléchargez le fichier ci-dessous et ouvrez-le :\n'
+          : '❌ Your booking has been cancelled.\n\nTo remove this event from your calendar, download the file below and open it:\n') + cancelICSUrl,
+        cancel_url: '', reschedule_url: '', cal_link: cancelICSUrl,
+        booking_id: b.bookingId || ''
+      });
+    }
+
+    // Send owner notification
     if (cfg.ejsService && cfg.ejsTemplate && cfg.ejsPubkey && cancelModalData) {
       emailjs.send(cfg.ejsService, cfg.ejsTemplate, {
         service: '⚠️ CANCELLED: ' + cancelModalData.service,
         date: cancelModalData.date, time: cancelModalData.time,
-        name: (document.getElementById('f-fname').value||'') + ' ' + (document.getElementById('f-lname').value||''),
-        email: loggedInEmail, phone: '', car: '', price: '—', duration: '—',
-        notes: currentLang==='fr' ? 'Réservation annulée par le client.' : 'Booking cancelled by client.'
+        name: b.name || '',
+        email: b.email || loggedInEmail, phone: b.phone || '',
+        car: b.car || '—', price: b.price || '—', duration: '—',
+        notes: currentLang==='fr' ? 'Réservation annulée par le client.' : 'Booking cancelled by client.',
+        cancel_url: '', reschedule_url: '', cal_link: ''
       });
     }
+
     closeCancelModal();
+
+    // Show download ICS button on confirmation
+    showCancelICSButton(cancelICSUrl, cancelICS);
+
     await loadMyBookings();
   } catch(e) {
     console.error('confirmCancelModal:', e);
@@ -2445,6 +2552,11 @@ async function executeCancellation() {
       const local = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
       const updated = local.filter(s => !(s.date === bData.date && s.time === bData.time));
       localStorage.setItem(BOOKINGS_KEY, JSON.stringify(updated));
+
+      // Generate and show cancellation ICS
+      const cancelICS = generateCancellationICS(bData);
+      const cancelICSUrl = createICSDownloadUrl(cancelICS);
+      showCancelICSButton(cancelICSUrl, cancelICS);
     }
     document.getElementById('cancel-booking-details').style.display = 'none';
     const result = document.getElementById('cancel-result'); result.style.display = 'block';

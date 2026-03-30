@@ -541,7 +541,7 @@
 </div>
 
 <!-- ── SETUP MODAL ── -->
-<div class="modal-overlay" id="modal-overlay">
+<div class="modal-overlay hidden" id="modal-overlay">
   <div class="modal">
     <div class="modal-title">Integration Setup</div>
     <div class="modal-sub">Enter your API keys below. They are saved in your browser only — never sent anywhere else. You only need to do this once.</div>
@@ -876,10 +876,13 @@
       <div class="confirm-title" id="confirmed-title">Booking Received!</div>
       <div class="confirm-sub" id="confirmed-sub">Your appointment has been submitted. We will be in touch to confirm shortly.</div>
       <div class="confirm-chips" id="confirm-chips"></div>
-      <div style="margin-top:20px;">
-        <button class="btn btn-primary" id="btn-add-calendar" onclick="downloadICS()" style="display:none;">
-          📅 Add to My Calendar
+      <div style="margin-top:20px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <button class="btn btn-primary" id="btn-add-ical" onclick="downloadICS()" style="display:none;">
+          🍎 Apple Calendar
         </button>
+        <a class="btn btn-primary" id="btn-add-gcal" href="#" target="_blank" rel="noopener noreferrer" style="display:none; background:#4285f4;">
+          📅 Google Calendar
+        </a>
       </div>
     </div>
     <div class="register-card" id="register-card">
@@ -1258,20 +1261,6 @@ const db = firebase.firestore();
 // ── BOOKINGS STORAGE — Firestore ──
 const BOOKINGS_KEY = 'was_bookings'; // kept for offline fallback
 
-async function saveBooking(dateStr, time, durationMins) {
-  // Save to Firestore
-  try {
-    await db.collection('bookings').add({
-      date: dateStr, time, duration: durationMins,
-      status: 'upcoming', createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-  } catch(e) { console.error('Firestore saveBooking error:', e); }
-  // Also save locally as fallback
-  const local = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
-  local.push({ date: dateStr, time, duration: durationMins });
-  localStorage.setItem(BOOKINGS_KEY, JSON.stringify(local));
-}
-
 async function isSlotBlocked(dateStr, slotTime, slotDuration) {
   const BUFFER = 30;
   function toMins(t) { const [h,m] = t.split(':').map(Number); return h*60+m; }
@@ -1315,7 +1304,7 @@ async function saveFullBooking(data) {
     console.error('Firestore saveFullBooking error:', e);
     // Fallback to localStorage
     const full = JSON.parse(localStorage.getItem('was_full_bookings') || '[]');
-    full.push(data);
+    full.push({ ...data, status: 'upcoming' });
     localStorage.setItem('was_full_bookings', JSON.stringify(full));
   }
 }
@@ -1625,28 +1614,56 @@ async function confirmBooking() {
     cancel_url: cancelUrl,
     booking_id: bookingId,
     reschedule_url: rescheduleUrl,
-    cal_link: calLink
+    cal_link: '',
+    gcal_link: calLink
   };
 
   // ── Save booking to Firestore ──
   await saveFullBooking({
     bookingId,
-    date:     state.date,
-    time:     state.time,
-    duration: state.duration || 90,
-    service:  state.service,
-    price:    state.price,
-    name:     document.getElementById('f-fname').value + ' ' + document.getElementById('f-lname').value,
-    phone:    document.getElementById('f-phone').value,
-    email:    document.getElementById('f-email').value,
-    car:      getCarValue() + ' — ' + getSizeLabel(),
-    notes:    document.getElementById('f-notes').value || '',
-    status:   'upcoming'
+    date:        state.date,
+    time:        state.time,
+    duration:    state.duration || 90,
+    service:     state.service,
+    price:       state.price,
+    name:        document.getElementById('f-fname').value + ' ' + document.getElementById('f-lname').value,
+    phone:       document.getElementById('f-phone').value,
+    email:       document.getElementById('f-email').value,
+    car:         getCarValue() + ' — ' + getSizeLabel(),
+    notes:       document.getElementById('f-notes').value || '',
+    // Extra fields for reliable reschedule
+    serviceKeys: Object.keys(selectedServices).join(','),
+    brand:       document.getElementById('f-brand').value || '',
+    model:       document.getElementById('f-model').value || '',
+    size:        document.getElementById('f-size').value || ''
   });
-  // Also save to localStorage for offline slot blocking
-  const localBookings = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
-  localBookings.push({ date: state.date, time: state.time, duration: state.duration || 90 });
-  localStorage.setItem(BOOKINGS_KEY, JSON.stringify(localBookings));
+// Keep one local array in memory
+let localBookings = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
+// ── If this was a reschedule, now cancel the old booking first ──
+if (pendingRescheduleDocId) {
+  try {
+    const oldSnap = await db.collection('bookings').doc(pendingRescheduleDocId).get();
+    const oldB = oldSnap.data();
+    await db.collection('bookings').doc(pendingRescheduleDocId).update({ status: 'cancelled' });
+    // Remove only one matching old slot from localStorage
+    if (oldB) {
+      const idx = localBookings.findIndex(
+        s => s.date === oldB.date && s.time === oldB.time
+      );
+      if (idx !== -1) localBookings.splice(idx, 1);
+    }
+  } catch (e) {
+    console.error('Failed to cancel old booking:', e);
+  }
+  pendingRescheduleDocId = null;
+}
+// Save the new/current slot to localStorage
+localBookings.push({
+  date: state.date,
+  time: state.time,
+  duration: state.duration || 90
+});
+localStorage.setItem(BOOKINGS_KEY, JSON.stringify(localBookings));
   // Save email for auto-fill next visit
   localStorage.setItem('was_last_email', document.getElementById('f-email').value.trim());
 
@@ -1704,11 +1721,18 @@ async function confirmBooking() {
   if (results.calendar === 'failed')    chips.innerHTML += `<div class="confirm-chip failed">✗ Calendar failed</div>`;
   if (!results.email && !results.emailCustomer && !results.calendar) chips.innerHTML += `<div class="confirm-chip">Configure integrations in ⚙ Setup</div>`;
 
-  // Show Add to Calendar button
-  const calBtn = document.getElementById('btn-add-calendar');
-  if (calBtn) {
-    calBtn.style.display = 'inline-block';
-    calBtn.textContent = currentLang === 'fr' ? '📅 Ajouter à mon Calendrier' : '📅 Add to My Calendar';
+  // Show calendar buttons
+  const isFr = currentLang === 'fr';
+  const icalBtn = document.getElementById('btn-add-ical');
+  const gcalBtn = document.getElementById('btn-add-gcal');
+  if (icalBtn) {
+    icalBtn.style.display = 'inline-block';
+    icalBtn.textContent = isFr ? '🍎 Apple Calendar' : '🍎 Apple Calendar';
+  }
+  if (gcalBtn) {
+    gcalBtn.style.display = 'inline-block';
+    gcalBtn.href = calLink;
+    gcalBtn.textContent = isFr ? '📅 Google Agenda' : '📅 Google Calendar';
   }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2096,18 +2120,25 @@ function sendResetEmail() {
   const msgEl = document.getElementById('fp-msg');
 
   if (!email) {
-    msgEl.className = 'lp-error'; msgEl.textContent = currentLang === 'fr' ? 'Entrez votre email.' : 'Please enter your email.'; return;
+    msgEl.className = 'lp-error';
+    msgEl.textContent = currentLang === 'fr' ? 'Entrez votre email.' : 'Please enter your email.';
+    return;
   }
   if (!accounts[email]) {
-    msgEl.className = 'lp-error'; msgEl.textContent = currentLang === 'fr' ? 'Aucun compte trouvé.' : 'No account found with this email.'; return;
+    msgEl.className = 'lp-error';
+    msgEl.textContent = currentLang === 'fr' ? 'Aucun compte trouvé.' : 'No account found with this email.';
+    return;
   }
   if (cfg.ejsService && cfg.ejsTemplateCustomer && cfg.ejsPubkey) {
     emailjs.send(cfg.ejsService, cfg.ejsTemplateCustomer, {
-      name: accounts[email].fname || email, email, service: 'Password Reset',
-      date: new Date().toLocaleDateString(), time: '—', duration: '—', price: '—', car: '—',
-      cancel_url: '', reschedule_url: '', cal_link: '', booking_id: '',
+      name: accounts[email].fname || email,
+      email,
+      service: currentLang === 'fr' ? 'Réinitialisation du mot de passe' : 'Password Reset',
+      date: new Date().toLocaleDateString(),
+      time: '—', duration: '—', price: '—', car: '—',
+      cancel_url: '', reschedule_url: '', cal_link: '', gcal_link: '', booking_id: '',
       notes: currentLang === 'fr'
-        ? 'Demande de réinitialisation de mot de passe. Veuillez contacter Water & Steam directement.'
+        ? 'Demande de réinitialisation du mot de passe. Veuillez contacter Water & Steam directement.'
         : 'Password reset requested. Please contact Water & Steam directly.'
     });
   }
@@ -2376,7 +2407,7 @@ async function confirmCancelModal() {
         notes: (currentLang==='fr'
           ? '❌ Votre réservation a été annulée.\n\nPour supprimer cet événement de votre calendrier, téléchargez le fichier ci-dessous et ouvrez-le :\n'
           : '❌ Your booking has been cancelled.\n\nTo remove this event from your calendar, download the file below and open it:\n') + cancelICSUrl,
-        cancel_url: '', reschedule_url: '', cal_link: cancelICSUrl,
+        cancel_url: '', reschedule_url: '', cal_link: cancelICSUrl, gcal_link: '',
         booking_id: b.bookingId || ''
       });
     }
@@ -2390,7 +2421,7 @@ async function confirmCancelModal() {
         email: b.email || loggedInEmail, phone: b.phone || '',
         car: b.car || '—', price: b.price || '—', duration: '—',
         notes: currentLang==='fr' ? 'Réservation annulée par le client.' : 'Booking cancelled by client.',
-        cancel_url: '', reschedule_url: '', cal_link: ''
+        cancel_url: '', reschedule_url: '', cal_link: '', gcal_link: ''
       });
     }
 
@@ -2411,43 +2442,100 @@ async function cancelMyBooking(docId, service, date, time, price) {
 }
 
 // ── RESCHEDULE ──
-let rescheduleDocId = null;
-let rescheduleData = null;
+
+// ── RESCHEDULE — shared restore logic ──
+let pendingRescheduleDocId = null; // old booking kept active until new one is saved
+
+function restoreBookingContext(b) {
+  if (!b) return;
+  const isFr = currentLang === 'fr';
+
+  // Personal details
+  if (b.name) {
+    const parts = b.name.split(' ');
+    document.getElementById('f-fname').value = parts[0] || '';
+    document.getElementById('f-lname').value = parts.slice(1).join(' ') || '';
+  }
+  if (b.email) document.getElementById('f-email').value = b.email;
+  if (b.phone) document.getElementById('f-phone').value = b.phone;
+  if (b.notes) document.getElementById('f-notes').value = b.notes;
+
+  // Car brand/model/size
+  if (b.brand) {
+    const brandEl = document.getElementById('f-brand');
+    if (brandEl) { brandEl.value = b.brand; onBrandChange(); }
+  }
+  if (b.model) {
+    const modelEl = document.getElementById('f-model');
+    if (modelEl) { modelEl.value = b.model; onModelChange(); }
+  }
+  if (b.size) {
+    const sizeEl = document.getElementById('f-size');
+    if (sizeEl) sizeEl.value = b.size;
+  }
+
+  // Service selection
+  Object.keys(selectedServices).forEach(k => delete selectedServices[k]);
+  const serviceMap = {
+    'Quick Interior':'quick-int','Intensive Exterior':'int-ext',
+    'Intensive Interior':'int-int','Exterior PRO':'pro-ext','Interior PRO':'pro-int',
+    'Intérieur Rapide':'quick-int','Extérieur Intensif':'int-ext',
+    'Intérieur Intensif':'int-int','Extérieur PRO':'pro-ext','Intérieur PRO':'pro-int'
+  };
+  const keys = b.serviceKeys
+    ? b.serviceKeys.split(',').filter(Boolean)
+    : (b.service || '').split(' + ').map(n => serviceMap[n.trim()]).filter(Boolean);
+
+  const sizeCode = b.size || getCurrentSizeCode() || 'S';
+  keys.forEach(key => {
+    if (!PRICING[key]) return;
+    const pricing = PRICING[key][sizeCode] || PRICING[key]['S'];
+    const svcs = SERVICES[currentLang] || SERVICES['en'];
+    const svc = svcs.find(s => s.key === key);
+    selectedServices[key] = {
+      name: svc ? svc.name : key,
+      priceMin: pricing.p, priceMax: pricing.p, duration: pricing.d
+    };
+  });
+
+  // Restore state
+  state.service  = b.service || null;
+  state.price    = b.price   || null;
+  state.duration = keys.reduce((sum, k) => {
+    if (!PRICING[k]) return sum;
+    return sum + (PRICING[k][sizeCode] || PRICING[k]['S']).d;
+  }, 0) || b.duration || 90;
+
+  renderServiceCards();
+  updateSelectionBar();
+}
 
 async function rescheduleMyBooking(docId, service, date, time) {
-  // Show confirm first
   const isFr = currentLang === 'fr';
   if (!confirm(isFr
     ? `Reporter votre réservation du ${date} à ${time} ?\nVous choisirez une nouvelle date.`
     : `Reschedule your booking on ${date} at ${time}?\nYou will pick a new date.`)) return;
 
   try {
-    // Get full booking data before cancelling
     const snap = await db.collection('bookings').doc(docId).get();
     const b = snap.data();
+    if (!b) return;
 
-    // Cancel old booking
-    await db.collection('bookings').doc(docId).update({ status: 'cancelled' });
+    // Store for deferred cancel — do NOT cancel yet
+    pendingRescheduleDocId = docId;
 
-    // Free up old slot in localStorage
-    const local = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
-    const updated = local.filter(s => !(s.date === date && s.time === time));
-    localStorage.setItem(BOOKINGS_KEY, JSON.stringify(updated));
+    // Restore all booking context
+    restoreBookingContext(b);
 
-    // Keep all state — only reset date/time
-    state.date = null;
-    state.dateObj = null;
-    state.time = null;
+    // Reset only date/time
+    state.date = null; state.dateObj = null; state.time = null;
     document.getElementById('btn-step3').disabled = true;
 
-    // Remove My Bookings panel
     const panel = document.getElementById('my-bookings-panel');
     if (panel) panel.remove();
 
-    // Go to Step 3 (date picker) — service and details stay intact
     goStep(3);
 
-    // Show reschedule notice
     const sub = document.getElementById('s3-sub');
     sub.textContent = isFr
       ? '📅 Choisissez une nouvelle date pour : ' + (b.service || service)
@@ -2463,32 +2551,20 @@ async function executeReschedule() {
     return;
   }
   try {
-    // Get full booking data
     const snap = await db.collection('bookings').doc(cancelDocId).get();
     const b = snap.data();
+    if (!b) return;
 
-    // Cancel old slot
-    await db.collection('bookings').doc(cancelDocId).update({ status: 'cancelled' });
+    // Store for deferred cancel — do NOT cancel yet
+    pendingRescheduleDocId = cancelDocId;
 
-    // Free up slot in localStorage
-    const local = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
-    const updated = local.filter(s => !(s.date === b.date && s.time === b.time));
-    localStorage.setItem(BOOKINGS_KEY, JSON.stringify(updated));
+    // Restore all booking context
+    restoreBookingContext(b);
 
-    // Pre-fill form with original booking data
-    if (b.name) {
-      const parts = b.name.split(' ');
-      document.getElementById('f-fname').value = parts[0] || '';
-      document.getElementById('f-lname').value = parts.slice(1).join(' ') || '';
-    }
-    if (b.email) document.getElementById('f-email').value = b.email;
-    if (b.phone) document.getElementById('f-phone').value = b.phone;
-
-    // Keep state — only reset date/time
+    // Reset only date/time
     state.date = null; state.dateObj = null; state.time = null;
     document.getElementById('btn-step3').disabled = true;
 
-    // Go to Step 3
     document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('step-3').classList.add('active');
 
@@ -2500,6 +2576,7 @@ async function executeReschedule() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch(e) { console.error('executeReschedule:', e); }
 }
+
 
 
 let cancelDocId = null;

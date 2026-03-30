@@ -2448,7 +2448,6 @@ let pendingRescheduleDocId = null; // old booking kept active until new one is s
 
 function restoreBookingContext(b) {
   if (!b) return;
-  const isFr = currentLang === 'fr';
 
   // Personal details
   if (b.name) {

@@ -757,12 +757,12 @@
       </div>
       <div class="form-group">
         <label class="form-label">Vehicle Size <span id="lbl-size-auto" style="color:var(--accent);font-size:0.6rem;letter-spacing:1px;">AUTO-FILLED</span></label>
-        <select class="form-select" id="f-size" onchange="checkStep1()">
+        <select class="form-select" id="f-size" onchange="refreshAvailabilityAfterVehicleChange(); checkStep1()">
           <option value="">Auto-filled from model</option>
-          <option value="S">Small (Hatchback / City car)</option>
-          <option value="M">Medium (Sedan / Estate)</option>
-          <option value="L">Large (SUV / MPV)</option>
-          <option value="XL">Extra Large (Van / 4x4)</option>
+          <option value="S">City Car — Polo, Clio, A1, 208</option>
+          <option value="M">Saloon / Hatchback — Golf, 308, A3, Focus</option>
+          <option value="L">SUV / Estate — Tiguan, 3008, Q5, Passat</option>
+          <option value="XL">Large SUV / Van — Transporter, Kodiaq, Q7, Touareg</option>
         </select>
       </div>
       <div class="form-group full">
@@ -1214,7 +1214,7 @@ function renderCalendar() {
     else {
       cell.classList.add('available');
       if (date.toDateString() === today.toDateString()) cell.classList.add('today');
-      if (state.date === date.toDateString()) cell.classList.add('selected');
+      if (state.date === toISODate(date)) cell.classList.add('selected');
       cell.onclick = () => selectDate(date, cell);
     }
     grid.appendChild(cell);
@@ -1239,7 +1239,7 @@ function changeMonth(dir) {
 function selectDate(date, cell) {
   document.querySelectorAll('.cal-cell').forEach(c => c.classList.remove('selected'));
   cell.classList.add('selected');
-  state.date = date.toDateString();
+  state.date = toISODate(date);
   state.dateObj = date;
   state.time = null;
   document.getElementById('btn-step3').disabled = true;
@@ -1267,8 +1267,8 @@ async function isSlotBlocked(dateStr, slotTime, slotDuration) {
   const slotStart = toMins(slotTime);
   const slotEnd = slotStart + slotDuration + BUFFER;
 
+  // Firestore only — no Google auth popup for customers
   try {
-    // Force fresh data from server, bypass cache
     const snap = await db.collection('bookings')
       .where('date', '==', dateStr)
       .get({ source: 'server' });
@@ -1317,7 +1317,7 @@ async function renderTimeSlots(date) {
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   document.getElementById('time-panel-sub').textContent = days[date.getDay()] + ', ' + date.getDate() + ' ' + months[date.getMonth()];
 
-  const dateStr = date.toDateString();
+  const dateStr = toISODate(date);
   const duration = state.duration || 90;
   const container = document.getElementById('time-slots');
   container.innerHTML = '<div style="color:var(--muted);font-size:0.78rem;padding:8px 0;">Loading slots…</div>';
@@ -1348,15 +1348,40 @@ function selectTime(t, el) {
   document.getElementById('btn-step3').disabled = false;
 }
 
-renderCalendar();
+function parseISODateLocal(dateStr) {
+  const [y, m, d] = String(dateStr).split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
 
-// ── CAR BRAND → MODEL DATA ──
+function toISODate(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function formatDisplayDate(dateInput) {
+  if (!dateInput) return '';
+  const [y, m, d] = String(dateInput).split('-').map(Number);
+  const dateObj = new Date(y, m - 1, d);
+  return dateObj.toLocaleDateString(currentLang === 'fr' ? 'fr-FR' : 'en-GB', {
+    day: '2-digit', month: 'long', year: 'numeric'
+  });
+}
+
+function bookingDateTime(dateStr, timeStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const [hh, mm] = (timeStr || '0:0').split(':').map(Number);
+  return new Date(y, m - 1, d, hh, mm, 0, 0);
+}
+
+
 // S = Small, M = Medium, L = Large, XL = Extra Large
 const SIZE_LABEL = {
-  'S':  'Small (Hatchback / City car)',
-  'M':  'Medium (Sedan / Estate)',
-  'L':  'Large (SUV / MPV)',
-  'XL': 'Extra Large (Van / 4x4)'
+  'S':  'City Car',
+  'M':  'Saloon / Hatchback',
+  'L':  'SUV / Estate',
+  'XL': 'Large SUV / Van'
 };
 
 const CAR_MODELS = {
@@ -1485,15 +1510,25 @@ const CAR_MODELS = {
   },
 };
 
+function refreshAvailabilityAfterVehicleChange() {
+  state.time = null;
+  document.getElementById('btn-step3').disabled = true;
+  renderServiceCards();
+  updateSelectionBar();
+  if (state.dateObj) renderTimeSlots(state.dateObj);
+}
+
 function onBrandChange() {
   const brand = document.getElementById('f-brand').value;
   const modelSel = document.getElementById('f-model');
   const otherGroup = document.getElementById('other-car-group');
   const modelGroup = document.getElementById('model-group');
 
-  // Reset size
+  // Reset size and model
   document.getElementById('f-size').value = '';
   document.getElementById('f-size').disabled = false;
+  modelSel.value = '';
+  modelSel.style.color = '';
 
   if (brand === 'Other') {
     modelGroup.style.display = 'none';
@@ -1512,6 +1547,7 @@ function onBrandChange() {
     modelSel.disabled = true;
     modelSel.innerHTML = '<option value="">Select brand first</option>';
   }
+  refreshAvailabilityAfterVehicleChange();
   checkStep1();
 }
 
@@ -1521,16 +1557,14 @@ function onModelChange() {
   const sizeEl = document.getElementById('f-size');
 
   if (brand && model && CAR_MODELS[brand] && CAR_MODELS[brand][model]) {
-    const sizeCode = CAR_MODELS[brand][model]; // S, M, L, XL
+    const sizeCode = CAR_MODELS[brand][model];
     sizeEl.value = sizeCode;
     sizeEl.style.color = 'var(--accent)';
-    // Update service card prices live
-    renderServiceCards();
-    updateSelectionBar();
   } else {
     sizeEl.value = '';
     sizeEl.style.color = '';
   }
+  refreshAvailabilityAfterVehicleChange();
   checkStep1();
 }
 
@@ -1556,7 +1590,7 @@ function checkStep1() {
 function populateSummary() {
   document.getElementById('sum-service').textContent = state.service;
   document.getElementById('sum-price').textContent = state.price;
-  document.getElementById('sum-date').textContent = state.date;
+  document.getElementById('sum-date').textContent = formatDisplayDate(state.date);
   document.getElementById('sum-time').textContent = state.time;
   document.getElementById('sum-car').textContent = getCarValue() + ' · ' + getSizeLabel();
   document.getElementById('sum-name').textContent = document.getElementById('f-fname').value + ' ' + document.getElementById('f-lname').value;
@@ -1738,47 +1772,65 @@ localStorage.setItem(BOOKINGS_KEY, JSON.stringify(localBookings));
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ── GOOGLE CALENDAR ──
-async function addToGoogleCalendar(data) {
-  return new Promise((resolve, reject) => {
-    // Load Google API
-    const script = document.createElement('script');
-    script.src = 'https://apis.google.com/js/api.js';
-    script.onload = () => {
-      gapi.load('client:auth2', async () => {
-        try {
-          await gapi.client.init({
-            clientId: cfg.gcalClient,
-            scope: 'https://www.googleapis.com/auth/calendar.events',
-            discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest']
-          });
+// ── GOOGLE CALENDAR — race-safe shared init/auth ──
+let gcalReady = false;
+let gcalInitPromise = null;
 
-          await gapi.auth2.getAuthInstance().signIn();
+function ensureGoogleCalendarReady() {
+  if (!cfg.gcalClient || !cfg.gcalCalId) return Promise.resolve(false);
+  if (gcalInitPromise) return gcalInitPromise;
 
-          // Parse date & time
-          const [timePart] = data.time.split(':');
-          const [, minPart] = data.time.split(':');
-          const dateObj = new Date(state.dateObj);
-          dateObj.setHours(parseInt(timePart), parseInt(minPart), 0);
-          const endObj = new Date(dateObj.getTime() + (state.duration || 90) * 60000);
-
-          const event = {
-            summary: `🚗 ${data.service} — ${data.name}`,
-            location: data.location,
-            description: `Service: ${data.service}\nVehicle: ${data.car}\nPhone: ${data.phone}\nEmail: ${data.email}\nPrice: ${data.price}\nNotes: ${data.notes}`,
-            start: { dateTime: dateObj.toISOString(), timeZone: 'Europe/Luxembourg' },
-            end: { dateTime: endObj.toISOString(), timeZone: 'Europe/Luxembourg' },
-            reminders: { useDefault: false, overrides: [{            method: 'popup', minutes: 60 }] }
-          };
-
-          await gapi.client.calendar.events.insert({ calendarId: cfg.gcalCalId, resource: event });
-          resolve();
-        } catch(e) { reject(e); }
+  gcalInitPromise = (async () => {
+    if (!window.gapi) {
+      await new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://apis.google.com/js/api.js';
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
       });
+    }
+    await new Promise(resolve => gapi.load('client:auth2', resolve));
+    if (!gcalReady) {
+      await gapi.client.init({
+        clientId: cfg.gcalClient,
+        scope: 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly',
+        discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest']
+      });
+      gcalReady = true;
+    }
+    const auth = gapi.auth2.getAuthInstance();
+    if (!auth.isSignedIn.get()) await auth.signIn();
+    return true;
+  })();
+
+  return gcalInitPromise;
+}
+
+async function addToGoogleCalendar(data) {
+  try {
+    const ready = await ensureGoogleCalendarReady();
+    if (!ready) return;
+
+    const [h, m] = data.time.split(':').map(Number);
+    const dateObj = new Date(state.dateObj);
+    dateObj.setHours(h, m, 0, 0);
+    const endObj = new Date(dateObj.getTime() + (state.duration || 90) * 60000);
+
+    const event = {
+      summary: `🚗 ${data.service} — ${data.name}`,
+      location: data.location,
+      description: `Service: ${data.service}\nVehicle: ${data.car}\nPhone: ${data.phone}\nEmail: ${data.email}\nPrice: ${data.price}\nNotes: ${data.notes}`,
+      start: { dateTime: dateObj.toISOString(), timeZone: 'Europe/Luxembourg' },
+      end:   { dateTime: endObj.toISOString(),   timeZone: 'Europe/Luxembourg' },
+      reminders: { useDefault: false, overrides: [{ method: 'popup', minutes: 60 }] }
     };
-    script.onerror = reject;
-    document.head.appendChild(script);
-  });
+
+    await gapi.client.calendar.events.insert({ calendarId: cfg.gcalCalId, resource: event });
+  } catch(e) {
+    console.error('addToGoogleCalendar error:', e);
+    throw e;
+  }
 }
 
 // ── TRANSLATIONS ──
@@ -1805,8 +1857,8 @@ const T = {
     model: 'Model', modelPH: 'Select brand first', modelPH2: 'Select model',
     otherCar: 'Your Vehicle (brand & model)', otherCarPH: 'e.g. Renault Clio 2019',
     size: 'Vehicle Size', sizeAuto: 'AUTO-FILLED', sizePH: 'Auto-filled from model',
-    sizeS: 'Small (Hatchback / City car)', sizeM: 'Medium (Sedan / Estate)',
-    sizeL: 'Large (SUV / MPV)', sizeXL: 'Extra Large (Van / 4x4)',
+    sizeS: 'City Car — Polo, Clio, A1, 208', sizeM: 'Saloon / Hatchback — Golf, 308, A3, Focus',
+    sizeL: 'SUV / Estate — Tiguan, 3008, Q5, Passat', sizeXL: 'Large SUV / Van — Transporter, Kodiaq, Q7, Touareg',
     notes: 'Additional Notes (optional)', notesPH: 'Any specific requests, stains, or areas to focus on…',
     continueServices: 'Continue to Services',
     // Step 2
@@ -1872,8 +1924,8 @@ const T = {
     model: 'Modèle', modelPH: 'Sélectionner la marque d\'abord', modelPH2: 'Sélectionner le modèle',
     otherCar: 'Votre véhicule (marque & modèle)', otherCarPH: 'ex. Renault Clio 2019',
     size: 'Taille du véhicule', sizeAuto: 'AUTO', sizePH: 'Rempli automatiquement',
-    sizeS: 'Petite (Citadine / Compacte)', sizeM: 'Moyenne (Berline / Break)',
-    sizeL: 'Grande (SUV / Monospace)', sizeXL: 'Très grande (Van / 4x4)',
+    sizeS: 'Citadine — Polo, Clio, A1, 208', sizeM: 'Berline / Compacte — Golf, 308, A3, Focus',
+    sizeL: 'SUV / Break — Tiguan, 3008, Q5, Passat', sizeXL: 'Grand SUV / Van — Transporter, Kodiaq, Q7, Touareg',
     notes: 'Notes supplémentaires (optionnel)', notesPH: 'Demandes spécifiques, taches, zones à traiter…',
     continueServices: 'Continuer vers les Services',
     // Step 2
@@ -2147,13 +2199,12 @@ function sendResetEmail() {
 }
 
 function generateCancellationICS(booking) {
-  const dateParts = new Date(booking.date || new Date());
+  const dateParts = parseISODateLocal(booking.date || toISODate(new Date()));
   const [hour, min] = (booking.time || '9:00').split(':').map(Number);
-  dateParts.setHours(hour, min, 0);
+  dateParts.setHours(hour, min, 0, 0);
   const endDate = new Date(dateParts.getTime() + (booking.duration || 90) * 60000);
-  const fmt = d => d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
-  const uid = (booking.bookingId || generateBookingId()) + '@waterandsteam';
-
+  const fmt = d => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  const uid = `${booking.bookingId || generateBookingId()}@waterandsteam`;
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -2220,24 +2271,16 @@ function showCancelICSButton(url, icsContent) {
 let lastICSData = null;
 
 function generateICS(booking) {
-  // Parse date and time
-  const dateParts = new Date(booking.date);
+  const dateParts = parseISODateLocal(booking.date);
   const [hour, min] = booking.time.split(':').map(Number);
-  dateParts.setHours(hour, min, 0);
-
+  dateParts.setHours(hour, min, 0, 0);
   const endDate = new Date(dateParts.getTime() + (booking.duration || 90) * 60000);
-
-  function fmt(d) {
-    return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-  }
-
-  // 48h and 24h reminders
+  function fmt(d) { return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'; }
   const uid = booking.bookingId || generateBookingId();
   const now = fmt(new Date());
   const start = fmt(dateParts);
   const end = fmt(endDate);
-
-  const ics = [
+  return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
     'PRODID:-//Water & Steam//Booking//EN',
@@ -2254,7 +2297,7 @@ function generateICS(booking) {
     'BEGIN:VALARM',
     'TRIGGER:-PT48H',
     'ACTION:DISPLAY',
-    `DESCRIPTION:Reminder: ${booking.service} tomorrow at Water & Steam`,
+    `DESCRIPTION:Reminder: ${booking.service} in 2 days at Water & Steam`,
     'END:VALARM',
     'BEGIN:VALARM',
     'TRIGGER:-PT24H',
@@ -2264,8 +2307,6 @@ function generateICS(booking) {
     'END:VEVENT',
     'END:VCALENDAR'
   ].join('\r\n');
-
-  return ics;
 }
 
 function downloadICS() {
@@ -2282,10 +2323,9 @@ function downloadICS() {
 }
 
 function generateCalendarLink(booking) {
-  // Also generate a Google Calendar link as fallback
-  const dateParts = new Date(booking.date);
+  const dateParts = parseISODateLocal(booking.date);
   const [hour, min] = booking.time.split(':').map(Number);
-  dateParts.setHours(hour, min, 0);
+  dateParts.setHours(hour, min, 0, 0);
   const endDate = new Date(dateParts.getTime() + (booking.duration || 90) * 60000);
   const fmt = d => d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
   const params = new URLSearchParams({
@@ -2313,19 +2353,18 @@ async function loadMyBookings() {
       .where('status', '==', 'upcoming')
       .get();
     const bookings = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    const today = new Date();
     if (bookings.length === 0) { const ex = document.getElementById('my-bookings-panel'); if(ex) ex.remove(); return; }
     const panel = document.createElement('div');
     panel.className = 'my-bookings';
     panel.id = 'my-bookings-panel';
     panel.innerHTML = `<div class="my-bookings-title">📋 ${currentLang === 'fr' ? 'Mes Réservations' : 'My Bookings'}</div>` +
-      bookings.sort((a,b) => new Date(a.date)-new Date(b.date)).map(b => {
-        const hoursUntil = (new Date(b.date) - today) / 36e5;
+      bookings.sort((a, b) => bookingDateTime(a.date, a.time) - bookingDateTime(b.date, b.time)).map(b => {
+        const hoursUntil = (bookingDateTime(b.date, b.time) - new Date()) / 36e5;
         const canCancel = hoursUntil > 24;
         return `<div class="booking-item">
           <div class="booking-item-info">
             <div class="booking-item-service">${b.service || '—'}</div>
-            <div class="booking-item-date">${b.date} · ${b.time}</div>
+            <div class="booking-item-date">${formatDisplayDate(b.date)} · ${b.time}</div>
           </div>
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="booking-item-price">${b.price || '—'}</div>
@@ -2358,7 +2397,7 @@ function openCancelModal(docId, service, date, time, price) {
     : 'Your time slot will be freed. This cannot be undone.';
   document.getElementById('ccm-details').innerHTML = `
     <b>${service}</b><br>
-    📅 ${date} · ${time}<br>
+    📅 ${formatDisplayDate(date)} · ${time}<br>
     💶 ${price || '—'}
   `;
   document.getElementById('ccm-confirm-text').textContent = isFr ? '✕ Oui, annuler' : '✕ Yes, Cancel';
@@ -2602,7 +2641,7 @@ async function checkCancelLink() {
     const snap = await db.collection('bookings').where('bookingId','==',bookingId).limit(1).get();
     if (snap.empty) { document.getElementById('cancel-page-sub').textContent = currentLang==='fr'?'Réservation introuvable.':'Booking not found.'; return; }
     const doc = snap.docs[0]; const b = doc.data(); cancelDocId = doc.id;
-    const hoursUntil = (new Date(b.date) - new Date()) / 36e5;
+    const hoursUntil = (bookingDateTime(b.date, b.time) - new Date()) / 36e5;
     if (b.status === 'cancelled') { document.getElementById('cancel-page-sub').textContent = currentLang==='fr'?'Déjà annulée.':'Already cancelled.'; return; }
     if (hoursUntil < 24) {
       document.getElementById('cancel-page-sub').textContent = currentLang==='fr'
@@ -2617,7 +2656,7 @@ async function checkCancelLink() {
     details.style.display = 'block';
     details.innerHTML = `
       <div class="summary-row"><div class="summary-key">Service</div><div class="summary-val">${b.service}</div></div>
-      <div class="summary-row"><div class="summary-key">Date</div><div class="summary-val">${b.date}</div></div>
+      <div class="summary-row"><div class="summary-key">Date</div><div class="summary-val">${formatDisplayDate(b.date)}</div></div>
       <div class="summary-row"><div class="summary-key">Time</div><div class="summary-val">${b.time}</div></div>
       <div class="summary-row"><div class="summary-key">Vehicle</div><div class="summary-val">${b.car}</div></div>
       <div class="summary-row"><div class="summary-key">Price</div><div class="summary-val price">${b.price}</div></div>`;

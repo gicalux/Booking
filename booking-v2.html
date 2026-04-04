@@ -448,8 +448,6 @@
 
   /* ── MOBILE ── */
   @media (max-width: 640px) {
-
-    /* Header */
     header { padding: 12px 16px; padding-top: max(48px, env(safe-area-inset-top)); }
     .logo { font-size: 1.1rem; letter-spacing: 2px; }
     .setup-btn { display: none; }
@@ -457,34 +455,28 @@
     .lang-btn { padding: 6px 10px; font-size: 1.2rem; }
     .config-banner { padding: 10px 16px; font-size: 0.72rem; }
 
-    /* Hero */
     .hero { padding: 32px 20px 20px; }
     .hero::before { font-size: 35vw; }
     .hero h1 { font-size: 2.2rem; }
     .hero-label { font-size: 0.65rem; }
 
-    /* Steps bar — show dots only, no labels */
     .steps-bar { padding: 0 20px 28px; }
     .step-label { display: none; }
     .step-dot { width: 26px; height: 26px; font-size: 0.65rem; }
     .step-line { margin: 0 8px; }
 
-    /* Content */
     .content { padding: 0 20px 60px; }
     .section-title { font-size: 1.5rem; }
 
-    /* Service cards — single column */
     .services-grid { grid-template-columns: 1fr; gap: 12px; }
     .service-card { padding: 18px; }
     .service-name { font-size: 1.2rem; }
 
-    /* Selection bar — stack vertically */
     .selection-bar { flex-direction: column; align-items: flex-start; gap: 12px; padding: 14px 16px; }
     .sel-bar-left { gap: 14px; }
     .sel-bar-divider { width: 1px; height: 24px; }
     .sel-bar-services { max-width: 100%; font-size: 0.72rem; }
 
-    /* Calendar — stack vertically */
     .calendar-wrap { grid-template-columns: 1fr; gap: 16px; }
     .calendar { padding: 16px; }
     .cal-cell { font-size: 0.72rem; }
@@ -492,37 +484,28 @@
     .time-slots { grid-template-columns: repeat(3, 1fr); gap: 6px; }
     .time-slot { padding: 8px 4px; font-size: 0.75rem; }
 
-    /* Form — single column */
     .form-grid { grid-template-columns: 1fr; gap: 12px; }
     .form-group.full { grid-column: 1; }
     .form-input, .form-select, .form-textarea { padding: 11px 14px; font-size: 0.85rem; }
 
-    /* Summary card */
     .summary-card { padding: 20px; }
     .summary-row { flex-direction: column; gap: 4px; padding: 10px 0; }
     .summary-val { text-align: left; max-width: 100%; }
 
-    /* Buttons */
     .btn-row { flex-direction: column-reverse; gap: 10px; }
     .btn { width: 100%; text-align: center; padding: 14px; }
 
-    /* Confirm screen */
     .confirm-screen { padding: 40px 0; }
     .confirm-title { font-size: 2rem; }
     .confirm-chips { flex-direction: column; align-items: center; }
 
-    /* Register card */
     .register-card { padding: 24px 20px; }
-
-    /* Integration status */
     .integration-status { flex-direction: column; gap: 8px; }
 
-    /* Setup modal */
     .modal { padding: 28px 20px; }
     .modal-title { font-size: 1.4rem; }
   }
 
-  /* Medium screens */
   @media (max-width: 860px) {
     .hero { padding: 48px 32px 32px; }
     .steps-bar { padding: 0 32px 40px; }
@@ -534,19 +517,16 @@
 </head>
 <body>
 
-<!-- ── CONFIG NEEDED BANNER ── -->
 <div class="config-banner" id="config-banner">
   <div class="config-dot"></div>
   Setup required — <span class="config-link" onclick="openModal()">click here to add your API keys</span> and enable email + calendar integration.
 </div>
 
-<!-- ── SETUP MODAL ── -->
 <div class="modal-overlay hidden" id="modal-overlay">
   <div class="modal">
     <div class="modal-title">Integration Setup</div>
     <div class="modal-sub">Enter your API keys below. They are saved in your browser only — never sent anywhere else. You only need to do this once.</div>
 
-    <!-- EmailJS -->
     <div class="setup-section">
       <div class="setup-section-title">📧 EmailJS — Booking Emails</div>
       <div class="setup-step">
@@ -585,7 +565,6 @@
       </div>
     </div>
 
-    <!-- Google Calendar -->
     <div class="setup-section">
       <div class="setup-section-title">📅 Google Calendar — Auto-Block Time</div>
       <div class="setup-step">
@@ -623,7 +602,6 @@
   </div>
 </div>
 
-<!-- ── HEADER ── -->
 <header>
   <div class="logo">Water <span>&</span> Steam</div>
   <div class="header-right">
@@ -653,10 +631,7 @@
 
 <div class="content">
 
-  <!-- STEP 1: YOUR DETAILS -->
   <div class="step-panel active" id="step-1">
-
-    <!-- LOGIN BANNER -->
     <div class="login-banner" id="login-banner">
       <div class="login-banner-left">
         <span class="login-banner-icon">👤</span>
@@ -665,10 +640,7 @@
       <button class="login-banner-btn" id="login-banner-btn" onclick="toggleLoginPanel()">Sign In</button>
     </div>
 
-    <!-- LOGIN PANEL -->
     <div class="login-panel" id="login-panel">
-
-      <!-- LOGIN FORM -->
       <div id="lp-login">
         <div class="lp-title" id="lp-login-title">Sign In</div>
         <div class="form-grid" style="margin-bottom:12px;">
@@ -689,7 +661,6 @@
         </div>
       </div>
 
-      <!-- FORGOT PASSWORD -->
       <div id="lp-forgot" style="display:none;">
         <div class="lp-title" id="lp-forgot-title">Reset Password</div>
         <div class="lp-sub" id="lp-forgot-sub">Enter your email and we'll send you a reset link.</div>
@@ -705,7 +676,6 @@
           <button class="btn btn-ghost" onclick="showLoginForm()">← Back to Sign In</button>
         </div>
       </div>
-
     </div>
 
     <div class="section-title" id="s1-title">Your Details</div>
@@ -775,7 +745,6 @@
     </div>
   </div>
 
-  <!-- STEP 2: SERVICES -->
   <div class="step-panel" id="step-2">
     <div class="section-title" id="s2-title">Select Service</div>
     <div class="section-sub" id="s2-sub">You can combine Exterior + Interior services - tap to select</div>
@@ -796,7 +765,6 @@
     </div>
   </div>
 
-  <!-- STEP 3: DATE AND TIME -->
   <div class="step-panel" id="step-3">
     <div class="section-title" id="s3-title">Pick a Date and Time</div>
     <div class="section-sub" id="s3-sub">Monday to Friday - 9:30 AM to 6:00 PM</div>
@@ -822,12 +790,11 @@
       </div>
     </div>
     <div class="btn-row">
-      <button class="btn btn-ghost" onclick="goStep(2)">← Back</button>
+      <button class="btn btn-ghost" onclick="backFromStep3()">← Back</button>
       <button class="btn btn-primary" id="btn-step3" onclick="goStep(4)" disabled>Continue to Review</button>
     </div>
   </div>
 
-  <!-- STEP 4: CONFIRM -->
   <div class="step-panel" id="step-4">
     <div class="section-title" id="s4-title">Review and Confirm</div>
     <div class="section-sub" id="s4-sub">Check your booking details before confirming</div>
@@ -849,7 +816,6 @@
     </div>
   </div>
 
-  <!-- CANCEL PAGE -->
   <div class="step-panel" id="step-cancel">
     <div class="confirm-screen">
       <div class="confirm-icon" style="border-color:var(--red); background:rgba(224,85,85,0.1);">
@@ -868,6 +834,7 @@
       <div id="cancel-result" style="display:none;"></div>
     </div>
   </div>
+
   <div class="step-panel" id="step-confirmed">
     <div class="confirm-screen">
       <div class="confirm-icon">
@@ -901,8 +868,8 @@
             <input class="form-input" type="password" id="reg-password2" placeholder="Repeat password" oninput="checkRegister()">
           </div>
         </div>
-        <div class="btn-row">
-          <button class="btn btn-primary" id="btn-register" onclick="registerAccount()" disabled>Create Account</button>
+        <div class="btn-row
+           <button class="btn btn-primary" id="btn-register" onclick="registerAccount()" disabled>Create Account</button>
           <button class="btn btn-ghost" id="btn-skip" onclick="skipRegister()">Skip for now</button>
         </div>
         <div id="reg-error" style="color:var(--red);font-size:0.78rem;margin-top:10px;display:none;"></div>
@@ -913,6 +880,8 @@
       </div>
     </div>
   </div>
+
+</div>
 
 <!-- ── CANCEL CONFIRM MODAL ── -->
 <div class="modal-overlay hidden" id="cancel-confirm-modal">
@@ -932,14 +901,14 @@
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+<script>
 // ── CONFIG ──
 const CFG_KEY = 'was_booking_config';
 let cfg = {};
 
 function loadConfig() {
   try { cfg = JSON.parse(localStorage.getItem(CFG_KEY) || '{}'); } catch(e) { cfg = {}; }
-  // Pre-fill known keys if not already saved
   if (!cfg.ejsService)          cfg.ejsService          = 'service_rbno8h5';
   if (!cfg.ejsTemplate)         cfg.ejsTemplate         = 'template_w1zhdh9';
   if (!cfg.ejsTemplateCustomer) cfg.ejsTemplateCustomer = 'template_ohidvdi';
@@ -969,12 +938,12 @@ function updateBanner() {
 }
 
 function openModal() {
-  document.getElementById('cfg-ejs-service').value           = cfg.ejsService             || '';
-  document.getElementById('cfg-ejs-template').value          = cfg.ejsTemplate            || '';
-  document.getElementById('cfg-ejs-template-customer').value = cfg.ejsTemplateCustomer    || '';
-  document.getElementById('cfg-ejs-pubkey').value            = cfg.ejsPubkey              || '';
-  document.getElementById('cfg-gcal-client').value           = cfg.gcalClient             || '';
-  document.getElementById('cfg-gcal-calid').value            = cfg.gcalCalId              || '';
+  document.getElementById('cfg-ejs-service').value           = cfg.ejsService || '';
+  document.getElementById('cfg-ejs-template').value          = cfg.ejsTemplate || '';
+  document.getElementById('cfg-ejs-template-customer').value = cfg.ejsTemplateCustomer || '';
+  document.getElementById('cfg-ejs-pubkey').value            = cfg.ejsPubkey || '';
+  document.getElementById('cfg-gcal-client').value           = cfg.gcalClient || '';
+  document.getElementById('cfg-gcal-calid').value            = cfg.gcalCalId || '';
   document.getElementById('modal-overlay').classList.remove('hidden');
 }
 
@@ -984,8 +953,12 @@ function closeModal() {
 
 // ── STATE ──
 const state = {
-  service: null, price: null,
-  date: null, dateObj: null, time: null,
+  service: null,
+  price: null,
+  duration: 0,
+  date: null,
+  dateObj: null,
+  time: null,
   currentYear: new Date().getFullYear(),
   currentMonth: new Date().getMonth()
 };
@@ -994,41 +967,49 @@ const state = {
 function goStep(n) {
   document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
   document.getElementById('step-' + n).classList.add('active');
+
   for (let i = 1; i <= 4; i++) {
     const dot = document.getElementById('sd-' + i);
     const item = document.getElementById('si-' + i);
-    dot.classList.remove('active','done');
+    dot.classList.remove('active', 'done');
     item.classList.remove('active');
-    if (i < n) { dot.classList.add('done'); dot.innerHTML = '✓'; }
-    else if (i === n) { dot.classList.add('active'); dot.innerHTML = i; item.classList.add('active'); }
-    else { dot.innerHTML = i; }
+
+    if (i < n) {
+      dot.classList.add('done');
+      dot.innerHTML = '✓';
+    } else if (i === n) {
+      dot.classList.add('active');
+      dot.innerHTML = i;
+      item.classList.add('active');
+    } else {
+      dot.innerHTML = i;
+    }
   }
+
   if (n === 4) populateSummary();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ── PRICING MATRIX — €72/hour, by car size ──
-// S=Small, M=Medium, L=Large, XL=Extra Large
+// ── PRICING ──
 const PRICING = {
   'quick-int':  { S:{p:36,d:30},  M:{p:54,d:45},  L:{p:72,d:60},  XL:{p:72,d:60}  },
   'int-ext':    { S:{p:30,d:25},  M:{p:36,d:30},  L:{p:42,d:35},  XL:{p:50,d:42}  },
   'pro-ext':    { S:{p:40,d:33},  M:{p:52,d:43},  L:{p:62,d:52},  XL:{p:70,d:58}  },
   'int-int':    { S:{p:72,d:60},  M:{p:96,d:80},  L:{p:120,d:100},XL:{p:144,d:120}},
-  'pro-int':    { S:{p:180,d:150},M:{p:216,d:180},L:{p:252,d:210},XL:{p:324,d:270}},
+  'pro-int':    { S:{p:180,d:150},M:{p:216,d:180},L:{p:252,d:210},XL:{p:324,d:270}}
 };
 
-// Category groups — only 1 per group allowed
 const SERVICE_GROUPS = {
   'quick-int': 'interior',
   'int-int':   'interior',
   'pro-int':   'interior',
   'int-ext':   'exterior',
-  'pro-ext':   'exterior',
+  'pro-ext':   'exterior'
 };
 
 function getCurrentSizeCode() {
   const val = document.getElementById('f-size') ? document.getElementById('f-size').value : '';
-  return val || 'S'; // default to Small if not set
+  return val || 'S';
 }
 
 function formatDur(mins) {
@@ -1037,48 +1018,41 @@ function formatDur(mins) {
   return h > 0 ? (m > 0 ? `${h}h ${m}min` : `${h}h`) : `${m}min`;
 }
 
-// ── SERVICE DEFINITIONS ──
 const SERVICES = {
   en: [
-    { key: 'quick-int', tag: 'Interior', name: 'Quick Interior', popular: null,
-      features: ['Quick vacuum cleaning','Dashboard dusting','Front window cleaning'] },
-    { key: 'int-ext',  tag: 'Exterior', name: 'Intensive Exterior', popular: '⭐ Popular',
-      features: ['Pre-wash','Rim wash (special detergent)','Door & trunk contours','Manual wash + quick wax'] },
-    { key: 'int-int',  tag: 'Interior', name: 'Intensive Interior', popular: '⭐ Popular',
-      features: ['Central console cleaning','Stain removal','Carpets & mats refresh','Trunk + windows & mirrors'] },
-    { key: 'pro-ext',  tag: 'Exterior PRO', name: 'Exterior PRO', popular: null,
-      features: ['Full body decontamination','Rim decontamination','All contours wash','Manual wash + quick wax'] },
-    { key: 'pro-int',  tag: 'Interior PRO', name: 'Interior PRO', popular: null,
-      features: ['Deep vacuum & dashboard wash','Full carpet & mat shampooing','Seat shampooing & stain removal','Trunk + windows & mirrors'] },
+    { key: 'quick-int', tag: 'Interior', name: 'Quick Interior', popular: null, features: ['Quick vacuum cleaning','Dashboard dusting','Front window cleaning'] },
+    { key: 'int-ext',  tag: 'Exterior', name: 'Intensive Exterior', popular: '⭐ Popular', features: ['Pre-wash','Rim wash (special detergent)','Door & trunk contours','Manual wash + quick wax'] },
+    { key: 'int-int',  tag: 'Interior', name: 'Intensive Interior', popular: '⭐ Popular', features: ['Central console cleaning','Stain removal','Carpets & mats refresh','Trunk + windows & mirrors'] },
+    { key: 'pro-ext',  tag: 'Exterior PRO', name: 'Exterior PRO', popular: null, features: ['Full body decontamination','Rim decontamination','All contours wash','Manual wash + quick wax'] },
+    { key: 'pro-int',  tag: 'Interior PRO', name: 'Interior PRO', popular: null, features: ['Deep vacuum & dashboard wash','Full carpet & mat shampooing','Seat shampooing & stain removal','Trunk + windows & mirrors'] }
   ],
   fr: [
-    { key: 'quick-int', tag: 'Intérieur', name: 'Intérieur Rapide', popular: null,
-      features: ['Aspirateur rapide','Dépoussiérage tableau de bord','Nettoyage vitres avant'] },
-    { key: 'int-ext',  tag: 'Extérieur', name: 'Extérieur Intensif', popular: '⭐ Populaire',
-      features: ['Prélavage','Lavage jantes (détergent spécial)','Contours portières & coffre','Lavage manuel + cirage rapide'] },
-    { key: 'int-int',  tag: 'Intérieur', name: 'Intérieur Intensif', popular: '⭐ Populaire',
-      features: ['Nettoyage console centrale','Enlèvement des taches','Rafraîchissement tapis & moquettes','Coffre + vitres & miroirs'] },
-    { key: 'pro-ext',  tag: 'Extérieur PRO', name: 'Extérieur PRO', popular: null,
-      features: ['Décontamination carrosserie','Décontamination jantes','Lavage tous contours','Lavage manuel + cirage rapide'] },
-    { key: 'pro-int',  tag: 'Intérieur PRO', name: 'Intérieur PRO', popular: null,
-      features: ['Aspirateur profond & tableau de bord','Shampouinage tapis & moquettes','Shampouinage sièges & taches','Coffre + vitres & miroirs'] },
+    { key: 'quick-int', tag: 'Intérieur', name: 'Intérieur Rapide', popular: null, features: ['Aspirateur rapide','Dépoussiérage tableau de bord','Nettoyage vitres avant'] },
+    { key: 'int-ext',  tag: 'Extérieur', name: 'Extérieur Intensif', popular: '⭐ Populaire', features: ['Prélavage','Lavage jantes (détergent spécial)','Contours portières & coffre','Lavage manuel + cirage rapide'] },
+    { key: 'int-int',  tag: 'Intérieur', name: 'Intérieur Intensif', popular: '⭐ Populaire', features: ['Nettoyage console centrale','Enlèvement des taches','Rafraîchissement tapis & moquettes','Coffre + vitres & miroirs'] },
+    { key: 'pro-ext',  tag: 'Extérieur PRO', name: 'Extérieur PRO', popular: null, features: ['Décontamination carrosserie','Décontamination jantes','Lavage tous contours','Lavage manuel + cirage rapide'] },
+    { key: 'pro-int',  tag: 'Intérieur PRO', name: 'Intérieur PRO', popular: null, features: ['Aspirateur profond & tableau de bord','Shampouinage tapis & moquettes','Shampouinage sièges & taches','Coffre + vitres & miroirs'] }
   ]
 };
 
 const clockSvg = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><polyline points="8,4.5 8,8 10.5,10"/></svg>`;
 const checkSvg = `<svg viewBox="0 0 12 12" fill="none" stroke="#000" stroke-width="2"><polyline points="2,6 5,9 10,3"/></svg>`;
 
+const selectedServices = {};
+
 function renderServiceCards() {
   const grid = document.getElementById('services-grid');
   if (!grid) return;
-  const services = SERVICES[currentLang] || SERVICES['en'];
+
+  const services = SERVICES[currentLang] || SERVICES.en;
   const sizeCode = getCurrentSizeCode();
   const selectedGroups = Object.keys(selectedServices).map(k => SERVICE_GROUPS[k]);
 
   grid.innerHTML = '';
+
   services.forEach(s => {
     const wasSelected = selectedServices[s.key];
-    const pricing = PRICING[s.key][sizeCode] || PRICING[s.key]['S'];
+    const pricing = PRICING[s.key][sizeCode] || PRICING[s.key].S;
     const group = SERVICE_GROUPS[s.key];
     const groupTaken = selectedGroups.includes(group) && !wasSelected;
 
@@ -1087,11 +1061,11 @@ function renderServiceCards() {
 
     const div = document.createElement('div');
     div.className = 'service-card' + (wasSelected ? ' selected' : '') + (groupTaken ? ' dimmed' : '');
-    div.setAttribute('data-key', s.key);
-    div.setAttribute('data-name', s.name);
-    div.setAttribute('data-price-min', pricing.p);
-    div.setAttribute('data-price-max', pricing.p);
-    div.setAttribute('data-duration', pricing.d);
+    div.dataset.key = s.key;
+    div.dataset.name = s.name;
+    div.dataset.priceMin = pricing.p;
+    div.dataset.priceMax = pricing.p;
+    div.dataset.duration = pricing.d;
     if (!groupTaken) div.onclick = function() { toggleService(this); };
 
     div.innerHTML = `
@@ -1108,7 +1082,9 @@ function renderServiceCards() {
         <div class="service-duration">${clockSvg}${durLabel}</div>
       </div>
     `;
+
     grid.appendChild(div);
+
     if (wasSelected) {
       selectedServices[s.key].name = s.name;
       selectedServices[s.key].priceMin = pricing.p;
@@ -1118,34 +1094,29 @@ function renderServiceCards() {
   });
 }
 
-// ── STEP 2 — service selection ──
-const selectedServices = {};
-
 function toggleService(el) {
   const key = el.dataset.key;
   const group = SERVICE_GROUPS[key];
   const sizeCode = getCurrentSizeCode();
-  const pricing = PRICING[key][sizeCode] || PRICING[key]['S'];
+  const pricing = PRICING[key][sizeCode] || PRICING[key].S;
 
   if (selectedServices[key]) {
-    // Deselect
     delete selectedServices[key];
     el.classList.remove('selected');
   } else {
-    // Deselect any other service in the same group first
     Object.keys(selectedServices).forEach(k => {
-      if (SERVICE_GROUPS[k] === group) {
-        delete selectedServices[k];
-      }
+      if (SERVICE_GROUPS[k] === group) delete selectedServices[k];
     });
+
     selectedServices[key] = {
-      name:     el.dataset.name,
+      name: el.dataset.name,
       priceMin: pricing.p,
       priceMax: pricing.p,
       duration: pricing.d
     };
     el.classList.add('selected');
   }
+
   renderServiceCards();
   updateSelectionBar();
 }
@@ -1158,12 +1129,15 @@ function updateSelectionBar() {
   if (keys.length === 0) {
     bar.classList.remove('visible');
     btn.disabled = true;
-    state.service = null; state.price = null; state.duration = 0;
+    state.service = null;
+    state.price = null;
+    state.duration = 0;
     return;
   }
 
   bar.classList.add('visible');
   btn.disabled = false;
+
   const totalMin = keys.reduce((s, k) => s + selectedServices[k].priceMin, 0);
   const totalMax = keys.reduce((s, k) => s + selectedServices[k].priceMax, 0);
   const totalDur = keys.reduce((s, k) => s + selectedServices[k].duration, 0);
@@ -1184,18 +1158,23 @@ function updateSelectionBar() {
   state.duration = totalDur;
 }
 
-// ── STEP 2: Calendar ──
+// ── CALENDAR ──
 function renderCalendar() {
   const { currentYear: y, currentMonth: m } = state;
   const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   document.getElementById('cal-title').textContent = months[m] + ' ' + y;
-  const today = new Date(); today.setHours(0,0,0,0);
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
   const firstDay = new Date(y, m, 1);
   const lastDay = new Date(y, m + 1, 0);
   let startDow = firstDay.getDay();
   startDow = startDow === 0 ? 6 : startDow - 1;
+
   const grid = document.getElementById('cal-grid');
   grid.innerHTML = '';
+
   const prevLast = new Date(y, m, 0).getDate();
   for (let i = startDow - 1; i >= 0; i--) {
     const cell = document.createElement('div');
@@ -1203,24 +1182,31 @@ function renderCalendar() {
     cell.textContent = prevLast - i;
     grid.appendChild(cell);
   }
+
   for (let d = 1; d <= lastDay.getDate(); d++) {
     const date = new Date(y, m, d);
     const dow = date.getDay();
     const cell = document.createElement('div');
     cell.textContent = d;
     cell.className = 'cal-cell';
-    if (dow === 0 || dow === 6) cell.classList.add('weekend');
-    else if (date < today) cell.classList.add('past');
-    else {
+
+    if (dow === 0 || dow === 6) {
+      cell.classList.add('weekend');
+    } else if (date < today) {
+      cell.classList.add('past');
+    } else {
       cell.classList.add('available');
       if (date.toDateString() === today.toDateString()) cell.classList.add('today');
       if (state.date === toISODate(date)) cell.classList.add('selected');
       cell.onclick = () => selectDate(date, cell);
     }
+
     grid.appendChild(cell);
   }
+
   const total = startDow + lastDay.getDate();
   const rem = total % 7 === 0 ? 0 : 7 - (total % 7);
+
   for (let i = 1; i <= rem; i++) {
     const cell = document.createElement('div');
     cell.className = 'cal-cell other-month';
@@ -1258,20 +1244,21 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ── BOOKINGS STORAGE — Firestore ──
-const BOOKINGS_KEY = 'was_bookings'; // kept for offline fallback
+const BOOKINGS_KEY = 'was_bookings';
 
 async function isSlotBlocked(dateStr, slotTime, slotDuration) {
   const BUFFER = 30;
-  function toMins(t) { const [h,m] = t.split(':').map(Number); return h*60+m; }
+
+  function toMins(t) {
+    const [h, m] = t.split(':').map(Number);
+    return h * 60 + m;
+  }
+
   const slotStart = toMins(slotTime);
   const slotEnd = slotStart + slotDuration + BUFFER;
 
-  // Firestore only — no Google auth popup for customers
   try {
-    const snap = await db.collection('bookings')
-      .where('date', '==', dateStr)
-      .get({ source: 'server' });
+    const snap = await db.collection('bookings').where('date', '==', dateStr).get({ source: 'server' });
     for (const doc of snap.docs) {
       const b = doc.data();
       if (b.status === 'cancelled') continue;
@@ -1280,12 +1267,12 @@ async function isSlotBlocked(dateStr, slotTime, slotDuration) {
       if (slotStart < bEnd && slotEnd > bStart) return true;
     }
     return false;
-  } catch(e) {
-    // Fallback to localStorage
+  } catch (e) {
     const local = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
     for (const b of local) {
       if (b.date !== dateStr) continue;
-      const bStart = toMins(b.time);
+      const [h, m] = b.time.split(':').map(Number);
+      const bStart = h * 60 + m;
       const bEnd = bStart + (b.duration || 90) + BUFFER;
       if (slotStart < bEnd && slotEnd > bStart) return true;
     }
@@ -1300,29 +1287,27 @@ async function saveFullBooking(data) {
       status: 'upcoming',
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
-  } catch(e) {
+  } catch (e) {
     console.error('Firestore saveFullBooking error:', e);
-    // Fallback to localStorage
     const full = JSON.parse(localStorage.getItem('was_full_bookings') || '[]');
     full.push({ ...data, status: 'upcoming' });
     localStorage.setItem('was_full_bookings', JSON.stringify(full));
   }
 }
 
-
-
 async function renderTimeSlots(date) {
   const slots = ['9:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00'];
   const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  document.getElementById('time-panel-sub').textContent = days[date.getDay()] + ', ' + date.getDate() + ' ' + months[date.getMonth()];
+
+  document.getElementById('time-panel-sub').textContent =
+    days[date.getDay()] + ', ' + date.getDate() + ' ' + months[date.getMonth()];
 
   const dateStr = toISODate(date);
   const duration = state.duration || 90;
   const container = document.getElementById('time-slots');
   container.innerHTML = '<div style="color:var(--muted);font-size:0.78rem;padding:8px 0;">Loading slots…</div>';
 
-  // Check all slots in parallel
   const blockedFlags = await Promise.all(slots.map(s => isSlotBlocked(dateStr, s, duration)));
 
   container.innerHTML = '';
@@ -1330,6 +1315,7 @@ async function renderTimeSlots(date) {
     const el = document.createElement('div');
     el.className = 'time-slot';
     el.textContent = s;
+
     if (blockedFlags[i]) {
       el.classList.add('booked');
       el.title = 'Already booked';
@@ -1337,6 +1323,7 @@ async function renderTimeSlots(date) {
       if (state.time === s) el.classList.add('selected');
       el.onclick = () => selectTime(s, el);
     }
+
     container.appendChild(el);
   });
 }
@@ -1365,7 +1352,9 @@ function formatDisplayDate(dateInput) {
   const [y, m, d] = String(dateInput).split('-').map(Number);
   const dateObj = new Date(y, m - 1, d);
   return dateObj.toLocaleDateString(currentLang === 'fr' ? 'fr-FR' : 'en-GB', {
-    day: '2-digit', month: 'long', year: 'numeric'
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
   });
 }
 
@@ -1375,139 +1364,48 @@ function bookingDateTime(dateStr, timeStr) {
   return new Date(y, m - 1, d, hh, mm, 0, 0);
 }
 
-
-// S = Small, M = Medium, L = Large, XL = Extra Large
 const SIZE_LABEL = {
-  'S':  'City Car',
-  'M':  'Saloon / Hatchback',
-  'L':  'SUV / Estate',
+  'S': 'City Car',
+  'M': 'Saloon / Hatchback',
+  'L': 'SUV / Estate',
   'XL': 'Large SUV / Van'
 };
 
 const CAR_MODELS = {
-  'Alfa Romeo': {
-    'Giulia':'M','Giulietta':'S','Stelvio':'L','Tonale':'L','MiTo':'S'
-  },
-  'Audi': {
-    'A1':'S','A3':'S','A4':'M','A5':'M','A6':'M','A7':'M','A8':'M',
-    'Q2':'S','Q3':'L','Q5':'L','Q7':'L','Q8':'L','TT':'S','R8':'S','e-tron':'L'
-  },
-  'BMW': {
-    '1 Series':'S','2 Series':'S','3 Series':'M','4 Series':'M','5 Series':'M',
-    '6 Series':'M','7 Series':'M','8 Series':'M','X1':'S','X2':'S','X3':'L',
-    'X4':'L','X5':'L','X6':'L','X7':'L','Z4':'S','M2':'S','M3':'M','M4':'M',
-    'M5':'M','iX':'L','i4':'M','i7':'M'
-  },
-  'Citroen': {
-    'C1':'S','C3':'S','C3 Aircross':'L','C4':'M','C4 X':'M',
-    'C5 Aircross':'L','C5 X':'L','Berlingo':'XL','SpaceTourer':'XL'
-  },
-  'Dacia': {
-    'Sandero':'S','Logan':'M','Duster':'L','Jogger':'L','Spring':'S','Bigster':'L'
-  },
-  'Ferrari': {
-    'Roma':'M','Portofino':'M','SF90':'M','F8':'M','296 GTB':'M','812':'M','Purosangue':'L'
-  },
-  'Fiat': {
-    '500':'S','500X':'L','500L':'L','Panda':'S','Tipo':'M','Ducato':'XL'
-  },
-  'Ford': {
-    'Fiesta':'S','Focus':'S','Mondeo':'M','Puma':'S','Kuga':'L',
-    'Explorer':'L','Mustang':'M','Ranger':'XL','Transit':'XL'
-  },
-  'Honda': {
-    'Civic':'M','Jazz':'S','HR-V':'L','CR-V':'L','ZR-V':'L','e:Ny1':'L'
-  },
-  'Hyundai': {
-    'i10':'S','i20':'S','i30':'S','Tucson':'L','Santa Fe':'L',
-    'Ioniq 5':'L','Ioniq 6':'M','Kona':'S'
-  },
-  'Jaguar': {
-    'XE':'M','XF':'M','F-Type':'M','E-Pace':'L','F-Pace':'L','I-Pace':'L'
-  },
-  'Jeep': {
-    'Renegade':'L','Compass':'L','Cherokee':'L','Grand Cherokee':'L',
-    'Wrangler':'XL','Avenger':'S'
-  },
-  'Kia': {
-    'Picanto':'S','Rio':'S','Ceed':'S','Sportage':'L','Sorento':'L',
-    'EV6':'M','Niro':'L','Stinger':'M'
-  },
-  'Lamborghini': {
-    'Huracán':'M','Urus':'L','Revuelto':'M'
-  },
-  'Land Rover': {
-    'Defender':'XL','Discovery':'XL','Discovery Sport':'L','Range Rover':'XL',
-    'Range Rover Sport':'L','Range Rover Velar':'L','Range Rover Evoque':'L'
-  },
-  'Lexus': {
-    'UX':'S','NX':'L','RX':'L','GX':'L','LX':'XL','IS':'M','ES':'M','LS':'M','LC':'M'
-  },
-  'Maserati': {
-    'Ghibli':'M','Quattroporte':'M','Levante':'L','Grecale':'L','GranTurismo':'M'
-  },
-  'Mazda': {
-    'Mazda2':'S','Mazda3':'S','Mazda6':'M','CX-3':'S','CX-30':'L',
-    'CX-5':'L','CX-60':'L','MX-5':'S'
-  },
-  'Mercedes-Benz': {
-    'A-Class':'S','B-Class':'S','C-Class':'M','E-Class':'M','S-Class':'M',
-    'CLA':'M','CLS':'M','GLA':'S','GLB':'L','GLC':'L','GLE':'L','GLS':'XL',
-    'AMG GT':'M','EQA':'S','EQB':'L','EQC':'L','EQE':'M','EQS':'M',
-    'Sprinter':'XL','Vito':'XL'
-  },
-  'Mini': {
-    'Hatch':'S','Convertible':'S','Clubman':'M','Countryman':'L','Paceman':'L','Coupe':'S'
-  },
-  'Mitsubishi': {
-    'ASX':'L','Eclipse Cross':'L','Outlander':'L','L200':'XL','Space Star':'S'
-  },
-  'Nissan': {
-    'Micra':'S','Juke':'S','Qashqai':'L','X-Trail':'L','Ariya':'L','Leaf':'S','Navara':'XL'
-  },
-  'Opel': {
-    'Corsa':'S','Astra':'S','Mokka':'S','Crossland':'L','Grandland':'L',
-    'Insignia':'M','Zafira':'XL'
-  },
-  'Peugeot': {
-    '108':'S','208':'S','308':'S','408':'M','508':'M','2008':'S',
-    '3008':'L','5008':'L','Rifter':'XL','Traveller':'XL'
-  },
-  'Porsche': {
-    '911':'M','Cayenne':'L','Macan':'L','Panamera':'M','Taycan':'M','718':'S'
-  },
-  'Renault': {
-    'Twingo':'S','Clio':'S','Megane':'S','Austral':'L','Kadjar':'L',
-    'Koleos':'L','Scenic':'L','Zoe':'S','Arkana':'L'
-  },
-  'Seat': {
-    'Ibiza':'S','Leon':'S','Arona':'S','Ateca':'L','Tarraco':'L','Alhambra':'XL'
-  },
-  'Skoda': {
-    'Fabia':'S','Octavia':'M','Superb':'M','Kamiq':'S','Karoq':'L','Kodiaq':'L','Enyaq':'L'
-  },
-  'Subaru': {
-    'Impreza':'S','Legacy':'M','Forester':'L','Outback':'L','XV':'L','BRZ':'S','Solterra':'L'
-  },
-  'Suzuki': {
-    'Alto':'S','Swift':'S','Baleno':'S','Vitara':'L','S-Cross':'L','Jimny':'XL','Across':'L'
-  },
-  'Tesla': {
-    'Model 3':'M','Model S':'M','Model X':'L','Model Y':'L','Cybertruck':'XL'
-  },
-  'Toyota': {
-    'Aygo':'S','Yaris':'S','Corolla':'M','Camry':'M','C-HR':'L','RAV4':'L',
-    'Highlander':'XL','Land Cruiser':'XL','Prius':'M','GR86':'S','Supra':'M','bZ4X':'L'
-  },
-  'Volkswagen': {
-    'Polo':'S','Golf':'S','Passat':'M','Arteon':'M','T-Cross':'S','T-Roc':'L',
-    'Tiguan':'L','Touareg':'L','ID.3':'S','ID.4':'L','ID.5':'L','ID.7':'M',
-    'Transporter':'XL','Caddy':'XL'
-  },
-  'Volvo': {
-    'V40':'S','V60':'M','V90':'M','S60':'M','S90':'M','XC40':'L',
-    'XC60':'L','XC90':'XL','C40':'L','EX30':'S','EX90':'XL'
-  },
+  'Alfa Romeo': {'Giulia':'M','Giulietta':'S','Stelvio':'L','Tonale':'L','MiTo':'S'},
+  'Audi': {'A1':'S','A3':'S','A4':'M','A5':'M','A6':'M','A7':'M','A8':'M','Q2':'S','Q3':'L','Q5':'L','Q7':'L','Q8':'L','TT':'S','R8':'S','e-tron':'L'},
+  'BMW': {'1 Series':'S','2 Series':'S','3 Series':'M','4 Series':'M','5 Series':'M','6 Series':'M','7 Series':'M','8 Series':'M','X1':'S','X2':'S','X3':'L','X4':'L','X5':'L','X6':'L','X7':'L','Z4':'S','M2':'S','M3':'M','M4':'M','M5':'M','iX':'L','i4':'M','i7':'M'},
+  'Citroen': {'C1':'S','C3':'S','C3 Aircross':'L','C4':'M','C4 X':'M','C5 Aircross':'L','C5 X':'L','Berlingo':'XL','SpaceTourer':'XL'},
+  'Dacia': {'Sandero':'S','Logan':'M','Duster':'L','Jogger':'L','Spring':'S','Bigster':'L'},
+  'Ferrari': {'Roma':'M','Portofino':'M','SF90':'M','F8':'M','296 GTB':'M','812':'M','Purosangue':'L'},
+  'Fiat': {'500':'S','500X':'L','500L':'L','Panda':'S','Tipo':'M','Ducato':'XL'},
+  'Ford': {'Fiesta':'S','Focus':'S','Mondeo':'M','Puma':'S','Kuga':'L','Explorer':'L','Mustang':'M','Ranger':'XL','Transit':'XL'},
+  'Honda': {'Civic':'M','Jazz':'S','HR-V':'L','CR-V':'L','ZR-V':'L','e:Ny1':'L'},
+  'Hyundai': {'i10':'S','i20':'S','i30':'S','Tucson':'L','Santa Fe':'L','Ioniq 5':'L','Ioniq 6':'M','Kona':'S'},
+  'Jaguar': {'XE':'M','XF':'M','F-Type':'M','E-Pace':'L','F-Pace':'L','I-Pace':'L'},
+  'Jeep': {'Renegade':'L','Compass':'L','Cherokee':'L','Grand Cherokee':'L','Wrangler':'XL','Avenger':'S'},
+  'Kia': {'Picanto':'S','Rio':'S','Ceed':'S','Sportage':'L','Sorento':'L','EV6':'M','Niro':'L','Stinger':'M'},
+  'Lamborghini': {'Huracán':'M','Urus':'L','Revuelto':'M'},
+  'Land Rover': {'Defender':'XL','Discovery':'XL','Discovery Sport':'L','Range Rover':'XL','Range Rover Sport':'L','Range Rover Velar':'L','Range Rover Evoque':'L'},
+  'Lexus': {'UX':'S','NX':'L','RX':'L','GX':'L','LX':'XL','IS':'M','ES':'M','LS':'M','LC':'M'},
+  'Maserati': {'Ghibli':'M','Quattroporte':'M','Levante':'L','Grecale':'L','GranTurismo':'M'},
+  'Mazda': {'Mazda2':'S','Mazda3':'S','Mazda6':'M','CX-3':'S','CX-30':'L','CX-5':'L','CX-60':'L','MX-5':'S'},
+  'Mercedes-Benz': {'A-Class':'S','B-Class':'S','C-Class':'M','E-Class':'M','S-Class':'M','CLA':'M','CLS':'M','GLA':'S','GLB':'L','GLC':'L','GLE':'L','GLS':'XL','AMG GT':'M','EQA':'S','EQB':'L','EQC':'L','EQE':'M','EQS':'M','Sprinter':'XL','Vito':'XL'},
+  'Mini': {'Hatch':'S','Convertible':'S','Clubman':'M','Countryman':'L','Paceman':'L','Coupe':'S'},
+  'Mitsubishi': {'ASX':'L','Eclipse Cross':'L','Outlander':'L','L200':'XL','Space Star':'S'},
+  'Nissan': {'Micra':'S','Juke':'S','Qashqai':'L','X-Trail':'L','Ariya':'L','Leaf':'S','Navara':'XL'},
+  'Opel': {'Corsa':'S','Astra':'S','Mokka':'S','Crossland':'L','Grandland':'L','Insignia':'M','Zafira':'XL'},
+  'Peugeot': {'108':'S','208':'S','308':'S','408':'M','508':'M','2008':'S','3008':'L','5008':'L','Rifter':'XL','Traveller':'XL'},
+  'Porsche': {'911':'M','Cayenne':'L','Macan':'L','Panamera':'M','Taycan':'M','718':'S'},
+  'Renault': {'Twingo':'S','Clio':'S','Megane':'S','Austral':'L','Kadjar':'L','Koleos':'L','Scenic':'L','Zoe':'S','Arkana':'L'},
+  'Seat': {'Ibiza':'S','Leon':'S','Arona':'S','Ateca':'L','Tarraco':'L','Alhambra':'XL'},
+  'Skoda': {'Fabia':'S','Octavia':'M','Superb':'M','Kamiq':'S','Karoq':'L','Kodiaq':'L','Enyaq':'L'},
+  'Subaru': {'Impreza':'S','Legacy':'M','Forester':'L','Outback':'L','XV':'L','BRZ':'S','Solterra':'L'},
+  'Suzuki': {'Alto':'S','Swift':'S','Baleno':'S','Vitara':'L','S-Cross':'L','Jimny':'XL','Across':'L'},
+  'Tesla': {'Model 3':'M','Model S':'M','Model X':'L','Model Y':'L','Cybertruck':'XL'},
+  'Toyota': {'Aygo':'S','Yaris':'S','Corolla':'M','Camry':'M','C-HR':'L','RAV4':'L','Highlander':'XL','Land Cruiser':'XL','Prius':'M','GR86':'S','Supra':'M','bZ4X':'L'},
+  'Volkswagen': {'Polo':'S','Golf':'S','Passat':'M','Arteon':'M','T-Cross':'S','T-Roc':'L','Tiguan':'L','Touareg':'L','ID.3':'S','ID.4':'L','ID.5':'L','ID.7':'M','Transporter':'XL','Caddy':'XL'},
+  'Volvo': {'V40':'S','V60':'M','V90':'M','S60':'M','S90':'M','XC40':'L','XC60':'L','XC90':'XL','C40':'L','EX30':'S','EX90':'XL'}
 };
 
 function refreshAvailabilityAfterVehicleChange() {
@@ -1524,7 +1422,6 @@ function onBrandChange() {
   const otherGroup = document.getElementById('other-car-group');
   const modelGroup = document.getElementById('model-group');
 
-  // Reset size and model
   document.getElementById('f-size').value = '';
   document.getElementById('f-size').disabled = false;
   modelSel.value = '';
@@ -1547,6 +1444,7 @@ function onBrandChange() {
     modelSel.disabled = true;
     modelSel.innerHTML = '<option value="">Select brand first</option>';
   }
+
   refreshAvailabilityAfterVehicleChange();
   checkStep1();
 }
@@ -1564,6 +1462,7 @@ function onModelChange() {
     sizeEl.value = '';
     sizeEl.style.color = '';
   }
+
   refreshAvailabilityAfterVehicleChange();
   checkStep1();
 }
@@ -1586,7 +1485,6 @@ function checkStep1() {
   document.getElementById('btn-step1').disabled = !(baseOk && carOk);
 }
 
-// ── STEP 4 ──
 function populateSummary() {
   document.getElementById('sum-service').textContent = state.service;
   document.getElementById('sum-price').textContent = state.price;
@@ -1597,10 +1495,10 @@ function populateSummary() {
   document.getElementById('sum-contact').textContent = document.getElementById('f-email').value + '\n' + document.getElementById('f-phone').value;
 
   const status = document.getElementById('int-status');
-  status.innerHTML = '';
   const emailReady = cfg.ejsService && cfg.ejsTemplate && cfg.ejsPubkey;
   const emailCustomerReady = cfg.ejsService && cfg.ejsTemplateCustomer && cfg.ejsPubkey;
   const calReady = cfg.gcalClient && cfg.gcalCalId;
+
   status.innerHTML = `
     <div class="int-badge ${emailReady ? 'ok' : 'warn'}"><div class="dot"></div>${emailReady ? 'Your email ready' : 'Owner email not set'}</div>
     <div class="int-badge ${emailCustomerReady ? 'ok' : 'warn'}"><div class="dot"></div>${emailCustomerReady ? 'Client email ready' : 'Client email not set'}</div>
@@ -1608,7 +1506,7 @@ function populateSummary() {
   `;
 }
 
-// ── CONFIRM ──
+// ── CONFIRM BOOKING ──
 async function confirmBooking() {
   const btn = document.getElementById('btn-confirm');
   btn.classList.add('btn-loading');
@@ -1620,30 +1518,35 @@ async function confirmBooking() {
   const durM = totalDur % 60;
   const durStr = durH > 0 ? (durM > 0 ? `${durH}h ${durM}min` : `${durH}h`) : `${durM}min`;
 
-  // Generate booking ID and calendar data first
   const bookingId = generateBookingId();
   const cancelUrl = `${window.location.href.split('?')[0]}?cancel=${bookingId}`;
   const rescheduleUrl = `${window.location.href.split('?')[0]}?reschedule=${bookingId}`;
 
   const icsBooking = {
-    date: state.date, time: state.time, duration: state.duration || 90,
-    service: state.service, car: getCarValue() + ' — ' + getSizeLabel(),
-    price: state.price, bookingId, cancelUrl
+    date: state.date,
+    time: state.time,
+    duration: state.duration || 90,
+    service: state.service,
+    car: getCarValue() + ' — ' + getSizeLabel(),
+    price: state.price,
+    bookingId,
+    cancelUrl
   };
+
   lastICSData = generateICS(icsBooking);
   const calLink = generateCalendarLink(icsBooking);
 
   const bookingData = {
-    service:  state.service,
-    date:     state.date,
-    time:     state.time,
+    service: state.service,
+    date: state.date,
+    time: state.time,
     duration: durStr,
-    name:     document.getElementById('f-fname').value + ' ' + document.getElementById('f-lname').value,
-    email:    document.getElementById('f-email').value,
-    phone:    document.getElementById('f-phone').value,
-    car:      getCarValue() + ' — ' + getSizeLabel(),
-    price:    state.price,
-    notes:    document.getElementById('f-notes').value || 'None',
+    name: document.getElementById('f-fname').value + ' ' + document.getElementById('f-lname').value,
+    email: document.getElementById('f-email').value,
+    phone: document.getElementById('f-phone').value,
+    car: getCarValue() + ' — ' + getSizeLabel(),
+    price: state.price,
+    notes: document.getElementById('f-notes').value || 'None',
     location: '2 Rue Edmond Reuter, L-5326 Contern, Luxembourg',
     cancel_url: cancelUrl,
     booking_id: bookingId,
@@ -1652,117 +1555,112 @@ async function confirmBooking() {
     gcal_link: calLink
   };
 
-  // ── Save booking to Firestore ──
   await saveFullBooking({
     bookingId,
-    date:        state.date,
-    time:        state.time,
-    duration:    state.duration || 90,
-    service:     state.service,
-    price:       state.price,
-    name:        document.getElementById('f-fname').value + ' ' + document.getElementById('f-lname').value,
-    phone:       document.getElementById('f-phone').value,
-    email:       document.getElementById('f-email').value,
-    car:         getCarValue() + ' — ' + getSizeLabel(),
-    notes:       document.getElementById('f-notes').value || '',
-    // Extra fields for reliable reschedule
+    date: state.date,
+    time: state.time,
+    duration: state.duration || 90,
+    service: state.service,
+    price: state.price,
+    name: document.getElementById('f-fname').value + ' ' + document.getElementById('f-lname').value,
+    phone: document.getElementById('f-phone').value,
+    email: document.getElementById('f-email').value,
+    car: getCarValue() + ' — ' + getSizeLabel(),
+    notes: document.getElementById('f-notes').value || '',
     serviceKeys: Object.keys(selectedServices).join(','),
-    brand:       document.getElementById('f-brand').value || '',
-    model:       document.getElementById('f-model').value || '',
-    size:        document.getElementById('f-size').value || ''
+    brand: document.getElementById('f-brand').value || '',
+    model: document.getElementById('f-model').value || '',
+    size: document.getElementById('f-size').value || ''
   });
-// Keep one local array in memory
-let localBookings = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
-// ── If this was a reschedule, now cancel the old booking first ──
-if (pendingRescheduleDocId) {
-  try {
-    const oldSnap = await db.collection('bookings').doc(pendingRescheduleDocId).get();
-    const oldB = oldSnap.data();
-    await db.collection('bookings').doc(pendingRescheduleDocId).update({ status: 'cancelled' });
-    // Remove only one matching old slot from localStorage
-    if (oldB) {
-      const idx = localBookings.findIndex(
-        s => s.date === oldB.date && s.time === oldB.time
-      );
-      if (idx !== -1) localBookings.splice(idx, 1);
+
+  let localBookings = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
+
+  if (pendingRescheduleDocId) {
+    try {
+      const oldSnap = await db.collection('bookings').doc(pendingRescheduleDocId).get();
+      const oldB = oldSnap.data();
+      await db.collection('bookings').doc(pendingRescheduleDocId).update({ status: 'cancelled' });
+      if (oldB) {
+        const idx = localBookings.findIndex(s => s.date === oldB.date && s.time === oldB.time);
+        if (idx !== -1) localBookings.splice(idx, 1);
+      }
+    } catch (e) {
+      console.error('Failed to cancel old booking:', e);
     }
-  } catch (e) {
-    console.error('Failed to cancel old booking:', e);
+    pendingRescheduleDocId = null;
   }
-  pendingRescheduleDocId = null;
-}
-// Save the new/current slot to localStorage
-localBookings.push({
-  date: state.date,
-  time: state.time,
-  duration: state.duration || 90
-});
-localStorage.setItem(BOOKINGS_KEY, JSON.stringify(localBookings));
-  // Save email for auto-fill next visit
+
+  localBookings.push({
+    date: state.date,
+    time: state.time,
+    duration: state.duration || 90
+  });
+  localStorage.setItem(BOOKINGS_KEY, JSON.stringify(localBookings));
+
   localStorage.setItem('was_last_email', document.getElementById('f-email').value.trim());
 
   const results = { email: null, emailCustomer: null, calendar: null };
 
-  // ── 1a. Send notification email → you ──
   if (cfg.ejsService && cfg.ejsTemplate && cfg.ejsPubkey) {
     try {
       await emailjs.send(cfg.ejsService, cfg.ejsTemplate, bookingData);
       results.email = 'sent';
-    } catch(e) {
+    } catch (e) {
       console.error('EmailJS (owner) error:', e);
       results.email = 'failed';
     }
   }
 
-  // ── 1b. Send confirmation email → customer ──
   if (cfg.ejsService && cfg.ejsTemplateCustomer && cfg.ejsPubkey) {
     try {
       await emailjs.send(cfg.ejsService, cfg.ejsTemplateCustomer, bookingData);
       results.emailCustomer = 'sent';
-    } catch(e) {
+    } catch (e) {
       console.error('EmailJS (customer) error:', e);
       results.emailCustomer = 'failed';
     }
   }
 
-  // ── 2. Google Calendar ──
   if (cfg.gcalClient && cfg.gcalCalId) {
     try {
       await addToGoogleCalendar(bookingData);
       results.calendar = 'added';
-    } catch(e) {
+    } catch (e) {
       console.error('Google Calendar error:', e);
       results.calendar = 'failed';
     }
   }
 
-  // ── Show confirmation ──
   document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
   document.getElementById('step-confirmed').classList.add('active');
+
   for (let i = 1; i <= 4; i++) {
     const dot = document.getElementById('sd-' + i);
-    dot.classList.remove('active'); dot.classList.add('done'); dot.innerHTML = '✓';
+    dot.classList.remove('active');
+    dot.classList.add('done');
+    dot.innerHTML = '✓';
     document.getElementById('si-' + i).classList.remove('active');
   }
 
   const chips = document.getElementById('confirm-chips');
   chips.innerHTML = '';
-  if (results.email === 'sent')         chips.innerHTML += `<div class="confirm-chip sent">✓ Notification sent to you</div>`;
-  if (results.email === 'failed')       chips.innerHTML += `<div class="confirm-chip failed">✗ Owner email failed</div>`;
+  if (results.email === 'sent') chips.innerHTML += `<div class="confirm-chip sent">✓ Notification sent to you</div>`;
+  if (results.email === 'failed') chips.innerHTML += `<div class="confirm-chip failed">✗ Owner email failed</div>`;
   if (results.emailCustomer === 'sent') chips.innerHTML += `<div class="confirm-chip sent">✓ Confirmation sent to client</div>`;
   if (results.emailCustomer === 'failed') chips.innerHTML += `<div class="confirm-chip failed">✗ Client email failed</div>`;
-  if (results.calendar === 'added')     chips.innerHTML += `<div class="confirm-chip sent">✓ Calendar blocked</div>`;
-  if (results.calendar === 'failed')    chips.innerHTML += `<div class="confirm-chip failed">✗ Calendar failed</div>`;
+  if (results.calendar === 'added') chips.innerHTML += `<div class="confirm-chip sent">✓ Calendar blocked</div>`;
+  if (results.calendar === 'failed') chips.innerHTML += `<div class="confirm-chip failed">✗ Calendar failed</div>`;
   if (!results.email && !results.emailCustomer && !results.calendar) chips.innerHTML += `<div class="confirm-chip">Configure integrations in ⚙ Setup</div>`;
 
-  // Show calendar buttons
   const isFr = currentLang === 'fr';
   const icalBtn = document.getElementById('btn-add-ical');
   const gcalBtn = document.getElementById('btn-add-gcal');
+
   if (icalBtn) {
     icalBtn.style.display = 'inline-block';
     icalBtn.textContent = isFr ? '🍎 Apple Calendar' : '🍎 Apple Calendar';
   }
+
   if (gcalBtn) {
     gcalBtn.style.display = 'inline-block';
     gcalBtn.href = calLink;
@@ -1772,7 +1670,7 @@ localStorage.setItem(BOOKINGS_KEY, JSON.stringify(localBookings));
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ── GOOGLE CALENDAR — race-safe shared init/auth ──
+// ── GOOGLE CALENDAR ──
 let gcalReady = false;
 let gcalInitPromise = null;
 
@@ -1790,7 +1688,9 @@ function ensureGoogleCalendarReady() {
         document.head.appendChild(script);
       });
     }
+
     await new Promise(resolve => gapi.load('client:auth2', resolve));
+
     if (!gcalReady) {
       await gapi.client.init({
         clientId: cfg.gcalClient,
@@ -1799,6 +1699,7 @@ function ensureGoogleCalendarReady() {
       });
       gcalReady = true;
     }
+
     const auth = gapi.auth2.getAuthInstance();
     if (!auth.isSignedIn.get()) await auth.signIn();
     return true;
@@ -1822,12 +1723,12 @@ async function addToGoogleCalendar(data) {
       location: data.location,
       description: `Service: ${data.service}\nVehicle: ${data.car}\nPhone: ${data.phone}\nEmail: ${data.email}\nPrice: ${data.price}\nNotes: ${data.notes}`,
       start: { dateTime: dateObj.toISOString(), timeZone: 'Europe/Luxembourg' },
-      end:   { dateTime: endObj.toISOString(),   timeZone: 'Europe/Luxembourg' },
+      end:   { dateTime: endObj.toISOString(), timeZone: 'Europe/Luxembourg' },
       reminders: { useDefault: false, overrides: [{ method: 'popup', minutes: 60 }] }
     };
 
     await gapi.client.calendar.events.insert({ calendarId: cfg.gcalCalId, resource: event });
-  } catch(e) {
+  } catch (e) {
     console.error('addToGoogleCalendar error:', e);
     throw e;
   }
@@ -1846,7 +1747,6 @@ const T = {
     step2Label: 'Services',
     step3Label: 'Date & Time',
     step4Label: 'Confirm',
-    // Step 1
     s1Title: 'Your Details',
     s1Sub: 'Tell us about you and your vehicle',
     fname: 'First Name', fnamePH: 'Jean',
@@ -1857,23 +1757,21 @@ const T = {
     model: 'Model', modelPH: 'Select brand first', modelPH2: 'Select model',
     otherCar: 'Your Vehicle (brand & model)', otherCarPH: 'e.g. Renault Clio 2019',
     size: 'Vehicle Size', sizeAuto: 'AUTO-FILLED', sizePH: 'Auto-filled from model',
-    sizeS: 'City Car — Polo, Clio, A1, 208', sizeM: 'Saloon / Hatchback — Golf, 308, A3, Focus',
-    sizeL: 'SUV / Estate — Tiguan, 3008, Q5, Passat', sizeXL: 'Large SUV / Van — Transporter, Kodiaq, Q7, Touareg',
+    sizeS: 'City Car — Polo, Clio, A1, 208',
+    sizeM: 'Saloon / Hatchback — Golf, 308, A3, Focus',
+    sizeL: 'SUV / Estate — Tiguan, 3008, Q5, Passat',
+    sizeXL: 'Large SUV / Van — Transporter, Kodiaq, Q7, Touareg',
     notes: 'Additional Notes (optional)', notesPH: 'Any specific requests, stains, or areas to focus on…',
     continueServices: 'Continue to Services',
-    // Step 2
     s2Title: 'Select Service',
     s2Sub: 'You can combine Exterior + Interior services · tap to select',
-    selCount1: 'service', selCountN: 'services',
     selDuration: 'Est. Duration', selPrice: 'Est. Price', selSelected: 'Selected',
     continueDate: 'Continue to Date',
-    // Step 3
     s3Title: 'Pick a Date & Time',
     s3Sub: 'Monday to Friday · 9:30 AM – 6:00 PM',
     availableSlots: 'Available Slots',
     selectDateFirst: 'Select a date first',
     continueReview: 'Continue to Review',
-    // Step 4
     s4Title: 'Review & Confirm',
     s4Sub: 'Check your booking details before confirming',
     sumName: 'Name', sumVehicle: 'Vehicle', sumService: 'Service',
@@ -1881,28 +1779,16 @@ const T = {
     sumLocation: 'Location', sumPrice: 'Estimated Price',
     confirmBtn: 'Confirm Booking ✓',
     editBtn: '← Edit',
-    // Confirmed
     confirmedTitle: 'Booking Received!',
     confirmedSub: 'Your appointment has been submitted. We\'ll be in touch to confirm shortly.',
-    chipOwner: '✓ Notification sent to you',
-    chipClient: '✓ Confirmation sent to client',
-    chipCal: '✓ Calendar blocked',
-    chipOwnerFail: '✗ Owner email failed',
-    chipClientFail: '✗ Client email failed',
-    chipCalFail: '✗ Calendar failed',
-    // Register
     regTitle: 'Save Your Details for Next Time',
     regSub: 'Create a free account so next visit your name, phone and car pre-fill automatically.',
     regPw: 'Choose a Password', regPwPH: 'Min. 6 characters',
     regPw2: 'Confirm Password', regPw2PH: 'Repeat password',
     regBtn: 'Create Account',
     regSkip: 'Skip for now',
-    regSuccess: 'Account Created',
-    regSuccessSub: 'Your details are saved. Next time everything pre-fills automatically.',
     loginBannerText: 'Returning client? Sign in to pre-fill your details.',
-    loginBannerBtn: 'Sign In',
-    signOut: 'Sign Out',
-    popular: '⭐ Popular',
+    loginBannerBtn: 'Sign In'
   },
   fr: {
     back: '← Retour au site',
@@ -1913,7 +1799,6 @@ const T = {
     step2Label: 'Services',
     step3Label: 'Date & Heure',
     step4Label: 'Confirmer',
-    // Step 1
     s1Title: 'Vos Détails',
     s1Sub: 'Parlez-nous de vous et de votre véhicule',
     fname: 'Prénom', fnamePH: 'Jean',
@@ -1924,23 +1809,21 @@ const T = {
     model: 'Modèle', modelPH: 'Sélectionner la marque d\'abord', modelPH2: 'Sélectionner le modèle',
     otherCar: 'Votre véhicule (marque & modèle)', otherCarPH: 'ex. Renault Clio 2019',
     size: 'Taille du véhicule', sizeAuto: 'AUTO', sizePH: 'Rempli automatiquement',
-    sizeS: 'Citadine — Polo, Clio, A1, 208', sizeM: 'Berline / Compacte — Golf, 308, A3, Focus',
-    sizeL: 'SUV / Break — Tiguan, 3008, Q5, Passat', sizeXL: 'Grand SUV / Van — Transporter, Kodiaq, Q7, Touareg',
+    sizeS: 'Citadine — Polo, Clio, A1, 208',
+    sizeM: 'Berline / Compacte — Golf, 308, A3, Focus',
+    sizeL: 'SUV / Break — Tiguan, 3008, Q5, Passat',
+    sizeXL: 'Grand SUV / Van — Transporter, Kodiaq, Q7, Touareg',
     notes: 'Notes supplémentaires (optionnel)', notesPH: 'Demandes spécifiques, taches, zones à traiter…',
     continueServices: 'Continuer vers les Services',
-    // Step 2
     s2Title: 'Sélectionner un Service',
     s2Sub: 'Vous pouvez combiner Extérieur + Intérieur · appuyez pour sélectionner',
-    selCount1: 'service', selCountN: 'services',
     selDuration: 'Durée est.', selPrice: 'Prix est.', selSelected: 'Sélectionné',
     continueDate: 'Continuer vers la Date',
-    // Step 3
     s3Title: 'Choisir une Date & Heure',
     s3Sub: 'Lundi au Vendredi · 9h30 – 18h00',
     availableSlots: 'Créneaux disponibles',
     selectDateFirst: 'Sélectionner une date d\'abord',
     continueReview: 'Continuer vers la Révision',
-    // Step 4
     s4Title: 'Réviser & Confirmer',
     s4Sub: 'Vérifiez vos informations avant de confirmer',
     sumName: 'Nom', sumVehicle: 'Véhicule', sumService: 'Service',
@@ -1948,29 +1831,28 @@ const T = {
     sumLocation: 'Adresse', sumPrice: 'Prix estimé',
     confirmBtn: 'Confirmer la Réservation ✓',
     editBtn: '← Modifier',
-    // Confirmed
     confirmedTitle: 'Réservation Reçue !',
     confirmedSub: 'Votre rendez-vous a été soumis. Nous vous contacterons pour confirmer.',
-    chipOwner: '✓ Notification envoyée', chipClient: '✓ Confirmation envoyée au client',
-    chipCal: '✓ Calendrier bloqué', chipOwnerFail: '✗ Email propriétaire échoué',
-    chipClientFail: '✗ Email client échoué', chipCalFail: '✗ Calendrier échoué',
-    // Register
     regTitle: 'Sauvegarder vos Détails',
     regSub: 'Créez un compte gratuit pour que vos infos se remplissent automatiquement la prochaine fois.',
     regPw: 'Choisir un mot de passe', regPwPH: 'Min. 6 caractères',
     regPw2: 'Confirmer le mot de passe', regPw2PH: 'Répéter le mot de passe',
     regBtn: 'Créer un Compte',
     regSkip: 'Ignorer pour l\'instant',
-    regSuccess: 'Compte Créé',
-    regSuccessSub: 'Vos détails sont sauvegardés. La prochaine fois tout se remplit automatiquement.',
     loginBannerText: 'Client habituel ? Connectez-vous pour pré-remplir.',
-    loginBannerBtn: 'Se connecter',
-    signOut: 'Se déconnecter',
-    popular: '⭐ Populaire',
+    loginBannerBtn: 'Se connecter'
   }
 };
 
-function t(key) { return T[currentLang][key] || T['en'][key] || key; }
+function setLabel(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+
+function setPlaceholder(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.placeholder = text;
+}
 
 function setLang(lang) {
   currentLang = lang;
@@ -1983,7 +1865,6 @@ function setLang(lang) {
 function applyTranslations() {
   const L = T[currentLang];
 
-  // Login banner (only update if not signed in)
   if (!loggedInEmail) {
     const bannerText = document.getElementById('login-banner-text');
     const bannerBtn = document.getElementById('login-banner-btn');
@@ -1991,24 +1872,18 @@ function applyTranslations() {
     if (bannerBtn) bannerBtn.textContent = L.loginBannerBtn;
   }
 
-  // Re-render service cards in new language
   renderServiceCards();
 
-  // Header
   document.querySelector('[data-i18n="back"]').textContent = L.back;
-
-  // Hero
   document.getElementById('hero-label').textContent = L.heroLabel;
   document.getElementById('hero-title').textContent = L.heroTitle;
   document.getElementById('hero-span').textContent = L.heroSpan;
 
-  // Step labels
   document.getElementById('sl-1').textContent = L.step1Label;
   document.getElementById('sl-2').textContent = L.step2Label;
   document.getElementById('sl-3').textContent = L.step3Label;
   document.getElementById('sl-4').textContent = L.step4Label;
 
-  // Step 1
   document.getElementById('s1-title').textContent = L.s1Title;
   document.getElementById('s1-sub').textContent = L.s1Sub;
   setLabel('lbl-fname', L.fname); setPlaceholder('f-fname', L.fnamePH);
@@ -2018,19 +1893,20 @@ function applyTranslations() {
   setLabel('lbl-brand', L.brand);
   document.querySelector('#f-brand option[value=""]').textContent = L.brandPH;
   setLabel('lbl-model', L.model);
-  document.querySelector('#f-model option').textContent = L.modelPH;
+  if (document.querySelector('#f-model option')) document.querySelector('#f-model option').textContent = L.modelPH;
   setLabel('lbl-other-car', L.otherCar); setPlaceholder('f-car-other', L.otherCarPH);
   document.getElementById('lbl-size-auto').textContent = L.sizeAuto;
   document.querySelector('#f-size option[value=""]').textContent = L.sizePH;
+
   const sizeOpts = document.querySelectorAll('#f-size option:not([value=""])');
   if (sizeOpts[0]) sizeOpts[0].textContent = L.sizeS;
   if (sizeOpts[1]) sizeOpts[1].textContent = L.sizeM;
   if (sizeOpts[2]) sizeOpts[2].textContent = L.sizeL;
   if (sizeOpts[3]) sizeOpts[3].textContent = L.sizeXL;
+
   setLabel('lbl-notes', L.notes); setPlaceholder('f-notes', L.notesPH);
   document.getElementById('btn-step1').textContent = L.continueServices;
 
-  // Step 2
   document.getElementById('s2-title').textContent = L.s2Title;
   document.getElementById('s2-sub').textContent = L.s2Sub;
   document.getElementById('sel-bar-label-sel').textContent = L.selSelected;
@@ -2038,17 +1914,13 @@ function applyTranslations() {
   document.getElementById('sel-bar-label-price').textContent = L.selPrice;
   document.getElementById('btn-step2').textContent = L.continueDate;
 
-  // Step 3
   document.getElementById('s3-title').textContent = L.s3Title;
   document.getElementById('s3-sub').textContent = L.s3Sub;
   document.getElementById('time-panel-title').textContent = L.availableSlots;
   const tps = document.getElementById('time-panel-sub');
-  if (tps.textContent.includes('Select') || tps.textContent.includes('Sélect')) {
-    tps.textContent = L.selectDateFirst;
-  }
+  if (tps.textContent.includes('Select') || tps.textContent.includes('Sélect')) tps.textContent = L.selectDateFirst;
   document.getElementById('btn-step3').textContent = L.continueReview;
 
-  // Step 4
   document.getElementById('s4-title').textContent = L.s4Title;
   document.getElementById('s4-sub').textContent = L.s4Sub;
   document.getElementById('sum-key-name').textContent = L.sumName;
@@ -2061,11 +1933,9 @@ function applyTranslations() {
   document.getElementById('btn-confirm').textContent = L.confirmBtn;
   document.getElementById('btn-edit').textContent = L.editBtn;
 
-  // Confirmed
   document.getElementById('confirmed-title').textContent = L.confirmedTitle;
   document.getElementById('confirmed-sub').textContent = L.confirmedSub;
 
-  // Register
   document.getElementById('reg-title').textContent = L.regTitle;
   document.getElementById('reg-sub').textContent = L.regSub;
   setLabel('lbl-reg-pw', L.regPw); setPlaceholder('reg-password', L.regPwPH);
@@ -2074,11 +1944,8 @@ function applyTranslations() {
   document.getElementById('btn-skip').textContent = L.regSkip;
 }
 
-function setLabel(id, text) { const el = document.getElementById(id); if (el) el.textContent = text; }
-function setPlaceholder(id, text) { const el = document.getElementById(id); if (el) el.placeholder = text; }
-
-
 // ── LOGIN ──
+const ACCOUNTS_KEY = 'was_accounts';
 let loggedInEmail = null;
 
 function toggleLoginPanel() {
@@ -2117,9 +1984,8 @@ function doLogin() {
   const account = accounts[email];
 
   if (!account || account.pw !== btoa(pw)) {
-    document.getElementById('li-error').textContent = currentLang === 'fr'
-      ? 'Email ou mot de passe incorrect.'
-      : 'Incorrect email or password.';
+    document.getElementById('li-error').textContent =
+      currentLang === 'fr' ? 'Email ou mot de passe incorrect.' : 'Incorrect email or password.';
     return;
   }
 
@@ -2128,11 +1994,15 @@ function doLogin() {
   document.getElementById('f-lname').value = account.lname || '';
   document.getElementById('f-phone').value = account.phone || '';
   document.getElementById('f-email').value = email;
+
   if (account.brand) {
     document.getElementById('f-brand').value = account.brand;
     onBrandChange();
     setTimeout(() => {
-      if (account.model) { document.getElementById('f-model').value = account.model; onModelChange(); }
+      if (account.model) {
+        document.getElementById('f-model').value = account.model;
+        onModelChange();
+      }
     }, 50);
   }
 
@@ -2143,9 +2013,8 @@ function doLogin() {
   const banner = document.getElementById('login-banner');
   banner.classList.add('signed-in');
   const name = (account.fname || email).split(' ')[0];
-  document.getElementById('login-banner-text').textContent = currentLang === 'fr'
-    ? `Bonjour ${name} — détails pré-remplis ✓`
-    : `Welcome back ${name} — details pre-filled ✓`;
+  document.getElementById('login-banner-text').textContent =
+    currentLang === 'fr' ? `Bonjour ${name} — détails pré-remplis ✓` : `Welcome back ${name} — details pre-filled ✓`;
   document.getElementById('login-banner-btn').textContent = currentLang === 'fr' ? 'Se déconnecter' : 'Sign Out';
   document.getElementById('login-banner-btn').onclick = doSignOut;
 }
@@ -2156,13 +2025,17 @@ function doSignOut() {
   document.getElementById('f-brand').value = '';
   document.getElementById('f-model').value = '';
   document.getElementById('f-size').value = '';
+
   const banner = document.getElementById('login-banner');
   banner.classList.remove('signed-in');
-  document.getElementById('login-banner-text').textContent = currentLang === 'fr'
-    ? 'Client habituel ? Connectez-vous pour pré-remplir.'
-    : 'Returning client? Sign in to pre-fill your details.';
+  document.getElementById('login-banner-text').textContent =
+    currentLang === 'fr' ? 'Client habituel ? Connectez-vous pour pré-remplir.' : 'Returning client? Sign in to pre-fill your details.';
   document.getElementById('login-banner-btn').textContent = currentLang === 'fr' ? 'Se connecter' : 'Sign In';
   document.getElementById('login-banner-btn').onclick = toggleLoginPanel;
+
+  const panel = document.getElementById('my-bookings-panel');
+  if (panel) panel.remove();
+
   checkStep1();
 }
 
@@ -2176,27 +2049,40 @@ function sendResetEmail() {
     msgEl.textContent = currentLang === 'fr' ? 'Entrez votre email.' : 'Please enter your email.';
     return;
   }
+
   if (!accounts[email]) {
     msgEl.className = 'lp-error';
     msgEl.textContent = currentLang === 'fr' ? 'Aucun compte trouvé.' : 'No account found with this email.';
     return;
   }
+
   if (cfg.ejsService && cfg.ejsTemplateCustomer && cfg.ejsPubkey) {
     emailjs.send(cfg.ejsService, cfg.ejsTemplateCustomer, {
       name: accounts[email].fname || email,
       email,
       service: currentLang === 'fr' ? 'Réinitialisation du mot de passe' : 'Password Reset',
       date: new Date().toLocaleDateString(),
-      time: '—', duration: '—', price: '—', car: '—',
-      cancel_url: '', reschedule_url: '', cal_link: '', gcal_link: '', booking_id: '',
+      time: '—',
+      duration: '—',
+      price: '—',
+      car: '—',
+      cancel_url: '',
+      reschedule_url: '',
+      cal_link: '',
+      gcal_link: '',
+      booking_id: '',
       notes: currentLang === 'fr'
         ? 'Demande de réinitialisation du mot de passe. Veuillez contacter Water & Steam directement.'
         : 'Password reset requested. Please contact Water & Steam directly.'
     });
   }
+
   msgEl.className = 'lp-success';
   msgEl.textContent = currentLang === 'fr' ? 'Email envoyé ! Vérifiez votre boîte mail.' : 'Reset email sent! Check your inbox.';
 }
+
+// ── ICS / CALENDAR LINKS ──
+let lastICSData = null;
 
 function generateCancellationICS(booking) {
   const dateParts = parseISODateLocal(booking.date || toISODate(new Date()));
@@ -2205,6 +2091,7 @@ function generateCancellationICS(booking) {
   const endDate = new Date(dateParts.getTime() + (booking.duration || 90) * 60000);
   const fmt = d => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
   const uid = `${booking.bookingId || generateBookingId()}@waterandsteam`;
+
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -2229,8 +2116,7 @@ function createICSDownloadUrl(icsContent) {
   return URL.createObjectURL(blob);
 }
 
-function showCancelICSButton(url, icsContent) {
-  // Show a floating download button after cancellation
+function showCancelICSButton(url) {
   const isFr = currentLang === 'fr';
   const existing = document.getElementById('cancel-ics-banner');
   if (existing) existing.remove();
@@ -2263,23 +2149,26 @@ function showCancelICSButton(url, icsContent) {
   `;
   document.body.appendChild(banner);
 
-  // Auto remove after 30 seconds
-  setTimeout(() => { if (banner.parentElement) banner.remove(); }, 30000);
+  setTimeout(() => {
+    if (banner.parentElement) banner.remove();
+  }, 30000);
 }
-
-
-let lastICSData = null;
 
 function generateICS(booking) {
   const dateParts = parseISODateLocal(booking.date);
   const [hour, min] = booking.time.split(':').map(Number);
   dateParts.setHours(hour, min, 0, 0);
   const endDate = new Date(dateParts.getTime() + (booking.duration || 90) * 60000);
-  function fmt(d) { return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'; }
+
+  function fmt(d) {
+    return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  }
+
   const uid = booking.bookingId || generateBookingId();
   const now = fmt(new Date());
   const start = fmt(dateParts);
   const end = fmt(endDate);
+
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -2327,7 +2216,8 @@ function generateCalendarLink(booking) {
   const [hour, min] = booking.time.split(':').map(Number);
   dateParts.setHours(hour, min, 0, 0);
   const endDate = new Date(dateParts.getTime() + (booking.duration || 90) * 60000);
-  const fmt = d => d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+  const fmt = d => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+
   const params = new URLSearchParams({
     action: 'TEMPLATE',
     text: `🚗 ${booking.service} — Water & Steam`,
@@ -2335,32 +2225,42 @@ function generateCalendarLink(booking) {
     details: `Service: ${booking.service}\nVehicle: ${booking.car}\nPrice: ${booking.price}`,
     location: '2 Rue Edmond Reuter, L-5326 Contern, Luxembourg'
   });
+
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
-
 function generateBookingId() {
-  return 'WS-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substr(2,4).toUpperCase();
+  return 'WS-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
 }
 
-// ── MY BOOKINGS (logged in clients) ──
+// ── MY BOOKINGS ──
 async function loadMyBookings() {
   const email = loggedInEmail;
   if (!email) return;
+
   try {
     const snap = await db.collection('bookings')
       .where('email', '==', email)
       .where('status', '==', 'upcoming')
       .get();
+
     const bookings = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    if (bookings.length === 0) { const ex = document.getElementById('my-bookings-panel'); if(ex) ex.remove(); return; }
+    if (bookings.length === 0) {
+      const ex = document.getElementById('my-bookings-panel');
+      if (ex) ex.remove();
+      return;
+    }
+
     const panel = document.createElement('div');
     panel.className = 'my-bookings';
     panel.id = 'my-bookings-panel';
-    panel.innerHTML = `<div class="my-bookings-title">📋 ${currentLang === 'fr' ? 'Mes Réservations' : 'My Bookings'}</div>` +
+
+    panel.innerHTML =
+      `<div class="my-bookings-title">📋 ${currentLang === 'fr' ? 'Mes Réservations' : 'My Bookings'}</div>` +
       bookings.sort((a, b) => bookingDateTime(a.date, a.time) - bookingDateTime(b.date, b.time)).map(b => {
         const hoursUntil = (bookingDateTime(b.date, b.time) - new Date()) / 36e5;
         const canCancel = hoursUntil > 24;
+
         return `<div class="booking-item">
           <div class="booking-item-info">
             <div class="booking-item-service">${b.service || '—'}</div>
@@ -2368,28 +2268,32 @@ async function loadMyBookings() {
           </div>
           <div style="display:flex;align-items:center;gap:8px;">
             <div class="booking-item-price">${b.price || '—'}</div>
-            <button class="btn-reschedule-booking" ${canCancel ? `onclick="rescheduleMyBooking('${b.id}','${b.service}','${b.date}','${b.time}')"` : 'disabled'} title="${canCancel ? '' : (currentLang==='fr'?'Impossible moins de 24h avant':'Cannot reschedule less than 24h before')}">
-              ${canCancel ? (currentLang==='fr'?'📅 Reporter':'📅 Reschedule') : '< 24h'}
+            <button class="btn-reschedule-booking" ${canCancel ? `onclick="rescheduleMyBooking('${b.id}','${b.service}','${b.date}','${b.time}')"` : 'disabled'} title="${canCancel ? '' : (currentLang === 'fr' ? 'Impossible moins de 24h avant' : 'Cannot reschedule less than 24h before')}">
+              ${canCancel ? (currentLang === 'fr' ? '📅 Reporter' : '📅 Reschedule') : '< 24h'}
             </button>
-            <button class="btn-cancel-booking" ${canCancel ? `onclick="cancelMyBooking('${b.id}','${b.service}','${b.date}','${b.time}','${b.price||''}')"` : 'disabled'}>
-              ${canCancel ? (currentLang==='fr'?'✕ Annuler':'✕ Cancel') : '< 24h'}
+            <button class="btn-cancel-booking" ${canCancel ? `onclick="cancelMyBooking('${b.id}','${b.service}','${b.date}','${b.time}','${b.price || ''}')"` : 'disabled'}>
+              ${canCancel ? (currentLang === 'fr' ? '✕ Annuler' : '✕ Cancel') : '< 24h'}
             </button>
           </div>
         </div>`;
       }).join('');
+
     const existing = document.getElementById('my-bookings-panel');
     if (existing) existing.remove();
     document.getElementById('login-banner').insertAdjacentElement('afterend', panel);
-  } catch(e) { console.error('loadMyBookings:', e); }
+  } catch (e) {
+    console.error('loadMyBookings:', e);
+  }
 }
 
-// ── CANCEL CONFIRM MODAL ──
+// ── CANCEL MODAL ──
 let cancelModalDocId = null;
 let cancelModalData = null;
 
 function openCancelModal(docId, service, date, time, price) {
   cancelModalDocId = docId;
   cancelModalData = { docId, service, date, time };
+
   const isFr = currentLang === 'fr';
   document.getElementById('ccm-title').textContent = isFr ? 'Annuler la réservation ?' : 'Cancel Booking?';
   document.getElementById('ccm-sub').textContent = isFr
@@ -2414,63 +2318,67 @@ async function confirmCancelModal() {
   if (!cancelModalDocId) return;
   const btn = document.getElementById('ccm-confirm-btn');
   btn.disabled = true;
+
   try {
-    // Get full booking data for cancellation email
     const snap = await db.collection('bookings').doc(cancelModalDocId).get();
     const b = snap.data() || {};
 
     await db.collection('bookings').doc(cancelModalDocId).update({ status: 'cancelled' });
 
-    // Free up the slot in localStorage too
     if (cancelModalData) {
       const local = JSON.parse(localStorage.getItem(BOOKINGS_KEY) || '[]');
       const updated = local.filter(s => !(s.date === cancelModalData.date && s.time === cancelModalData.time));
       localStorage.setItem(BOOKINGS_KEY, JSON.stringify(updated));
     }
 
-    // Generate cancellation ICS
     const cancelICS = generateCancellationICS(b);
     const cancelICSUrl = createICSDownloadUrl(cancelICS);
 
-    // Send cancellation email to client
     if (cfg.ejsService && cfg.ejsTemplateCustomer && cfg.ejsPubkey && (b.email || loggedInEmail)) {
       emailjs.send(cfg.ejsService, cfg.ejsTemplateCustomer, {
         service: '❌ ' + (b.service || cancelModalData.service),
         date: b.date || cancelModalData.date,
         time: b.time || cancelModalData.time,
-        duration: '—', price: b.price || '—',
-        name: b.name || ((document.getElementById('f-fname').value||'') + ' ' + (document.getElementById('f-lname').value||'')),
+        duration: '—',
+        price: b.price || '—',
+        name: b.name || ((document.getElementById('f-fname').value || '') + ' ' + (document.getElementById('f-lname').value || '')),
         email: b.email || loggedInEmail,
         phone: b.phone || '',
         car: b.car || '—',
-        notes: (currentLang==='fr'
+        notes: (currentLang === 'fr'
           ? '❌ Votre réservation a été annulée.\n\nPour supprimer cet événement de votre calendrier, téléchargez le fichier ci-dessous et ouvrez-le :\n'
           : '❌ Your booking has been cancelled.\n\nTo remove this event from your calendar, download the file below and open it:\n') + cancelICSUrl,
-        cancel_url: '', reschedule_url: '', cal_link: cancelICSUrl, gcal_link: '',
+        cancel_url: '',
+        reschedule_url: '',
+        cal_link: cancelICSUrl,
+        gcal_link: '',
         booking_id: b.bookingId || ''
       });
     }
 
-    // Send owner notification
     if (cfg.ejsService && cfg.ejsTemplate && cfg.ejsPubkey && cancelModalData) {
       emailjs.send(cfg.ejsService, cfg.ejsTemplate, {
         service: '⚠️ CANCELLED: ' + cancelModalData.service,
-        date: cancelModalData.date, time: cancelModalData.time,
+        date: cancelModalData.date,
+        time: cancelModalData.time,
         name: b.name || '',
-        email: b.email || loggedInEmail, phone: b.phone || '',
-        car: b.car || '—', price: b.price || '—', duration: '—',
-        notes: currentLang==='fr' ? 'Réservation annulée par le client.' : 'Booking cancelled by client.',
-        cancel_url: '', reschedule_url: '', cal_link: '', gcal_link: ''
+        email: b.email || loggedInEmail,
+        phone: b.phone || '',
+        car: b.car || '—',
+        price: b.price || '—',
+        duration: '—',
+        notes: currentLang === 'fr' ? 'Réservation annulée par le client.' : 'Booking cancelled by client.',
+        cancel_url: '',
+        reschedule_url: '',
+        cal_link: '',
+        gcal_link: ''
       });
     }
 
     closeCancelModal();
-
-    // Show download ICS button on confirmation
-    showCancelICSButton(cancelICSUrl, cancelICS);
-
+    showCancelICSButton(cancelICSUrl);
     await loadMyBookings();
-  } catch(e) {
+  } catch (e) {
     console.error('confirmCancelModal:', e);
     btn.disabled = false;
   }
@@ -2481,14 +2389,35 @@ async function cancelMyBooking(docId, service, date, time, price) {
 }
 
 // ── RESCHEDULE ──
+let pendingRescheduleDocId = null;
+let cancelDocId = null;
 
-// ── RESCHEDULE — shared restore logic ──
-let pendingRescheduleDocId = null; // old booking kept active until new one is saved
+function openRescheduleStep(serviceLabel = '') {
+  state.date = null;
+  state.dateObj = null;
+  state.time = null;
+  document.getElementById('btn-step3').disabled = true;
+
+  const now = new Date();
+  state.currentYear = now.getFullYear();
+  state.currentMonth = now.getMonth();
+
+  goStep(3);
+  renderCalendar();
+  document.getElementById('time-slots').innerHTML = '';
+  document.getElementById('time-panel-sub').textContent =
+    currentLang === 'fr' ? "Sélectionner une date d'abord" : 'Select a date first';
+
+  const sub = document.getElementById('s3-sub');
+  sub.textContent = currentLang === 'fr'
+    ? `📅 Choisissez une nouvelle date pour : ${serviceLabel}`
+    : `📅 Pick a new date & time for: ${serviceLabel}`;
+  sub.style.color = 'var(--accent)';
+}
 
 function restoreBookingContext(b) {
   if (!b) return;
 
-  // Personal details
   if (b.name) {
     const parts = b.name.split(' ');
     document.getElementById('f-fname').value = parts[0] || '';
@@ -2498,28 +2427,42 @@ function restoreBookingContext(b) {
   if (b.phone) document.getElementById('f-phone').value = b.phone;
   if (b.notes) document.getElementById('f-notes').value = b.notes;
 
-  // Car brand/model/size
   if (b.brand) {
     const brandEl = document.getElementById('f-brand');
-    if (brandEl) { brandEl.value = b.brand; onBrandChange(); }
+    if (brandEl) {
+      brandEl.value = b.brand;
+      onBrandChange();
+    }
   }
+
   if (b.model) {
     const modelEl = document.getElementById('f-model');
-    if (modelEl) { modelEl.value = b.model; onModelChange(); }
+    if (modelEl) {
+      modelEl.value = b.model;
+      onModelChange();
+    }
   }
+
   if (b.size) {
     const sizeEl = document.getElementById('f-size');
     if (sizeEl) sizeEl.value = b.size;
   }
 
-  // Service selection
   Object.keys(selectedServices).forEach(k => delete selectedServices[k]);
+
   const serviceMap = {
-    'Quick Interior':'quick-int','Intensive Exterior':'int-ext',
-    'Intensive Interior':'int-int','Exterior PRO':'pro-ext','Interior PRO':'pro-int',
-    'Intérieur Rapide':'quick-int','Extérieur Intensif':'int-ext',
-    'Intérieur Intensif':'int-int','Extérieur PRO':'pro-ext','Intérieur PRO':'pro-int'
+    'Quick Interior':'quick-int',
+    'Intensive Exterior':'int-ext',
+    'Intensive Interior':'int-int',
+    'Exterior PRO':'pro-ext',
+    'Interior PRO':'pro-int',
+    'Intérieur Rapide':'quick-int',
+    'Extérieur Intensif':'int-ext',
+    'Intérieur Intensif':'int-int',
+    'Extérieur PRO':'pro-ext',
+    'Intérieur PRO':'pro-int'
   };
+
   const keys = b.serviceKeys
     ? b.serviceKeys.split(',').filter(Boolean)
     : (b.service || '').split(' + ').map(n => serviceMap[n.trim()]).filter(Boolean);
@@ -2527,21 +2470,22 @@ function restoreBookingContext(b) {
   const sizeCode = b.size || getCurrentSizeCode() || 'S';
   keys.forEach(key => {
     if (!PRICING[key]) return;
-    const pricing = PRICING[key][sizeCode] || PRICING[key]['S'];
-    const svcs = SERVICES[currentLang] || SERVICES['en'];
+    const pricing = PRICING[key][sizeCode] || PRICING[key].S;
+    const svcs = SERVICES[currentLang] || SERVICES.en;
     const svc = svcs.find(s => s.key === key);
     selectedServices[key] = {
       name: svc ? svc.name : key,
-      priceMin: pricing.p, priceMax: pricing.p, duration: pricing.d
+      priceMin: pricing.p,
+      priceMax: pricing.p,
+      duration: pricing.d
     };
   });
 
-  // Restore state
-  state.service  = b.service || null;
-  state.price    = b.price   || null;
+  state.service = b.service || null;
+  state.price = b.price || null;
   state.duration = keys.reduce((sum, k) => {
     if (!PRICING[k]) return sum;
-    return sum + (PRICING[k][sizeCode] || PRICING[k]['S']).d;
+    return sum + (PRICING[k][sizeCode] || PRICING[k].S).d;
   }, 0) || b.duration || 90;
 
   renderServiceCards();
@@ -2559,66 +2503,35 @@ async function rescheduleMyBooking(docId, service, date, time) {
     const b = snap.data();
     if (!b) return;
 
-    // Store for deferred cancel — do NOT cancel yet
     pendingRescheduleDocId = docId;
-
-    // Restore all booking context
     restoreBookingContext(b);
-
-    // Reset only date/time
-    state.date = null; state.dateObj = null; state.time = null;
-    document.getElementById('btn-step3').disabled = true;
 
     const panel = document.getElementById('my-bookings-panel');
     if (panel) panel.remove();
 
-    goStep(3);
-
-    const sub = document.getElementById('s3-sub');
-    sub.textContent = isFr
-      ? '📅 Choisissez une nouvelle date pour : ' + (b.service || service)
-      : '📅 Pick a new date & time for: ' + (b.service || service);
-    sub.style.color = 'var(--accent)';
-
-  } catch(e) { console.error('rescheduleMyBooking:', e); }
+    openRescheduleStep(b.service || service);
+  } catch (e) {
+    console.error('rescheduleMyBooking:', e);
+  }
 }
 
 async function executeReschedule() {
-  if (!cancelDocId) {
-    console.warn('No booking to reschedule');
-    return;
-  }
+  if (!cancelDocId) return;
+
   try {
     const snap = await db.collection('bookings').doc(cancelDocId).get();
     const b = snap.data();
     if (!b) return;
 
-    // Store for deferred cancel — do NOT cancel yet
     pendingRescheduleDocId = cancelDocId;
-
-    // Restore all booking context
     restoreBookingContext(b);
-
-    // Reset only date/time
-    state.date = null; state.dateObj = null; state.time = null;
-    document.getElementById('btn-step3').disabled = true;
-
-    document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('step-3').classList.add('active');
-
-    const sub = document.getElementById('s3-sub');
-    sub.textContent = currentLang === 'fr'
-      ? '📅 Choisissez une nouvelle date pour : ' + (b.service || '')
-      : '📅 Pick a new date & time for: ' + (b.service || '');
-    sub.style.color = 'var(--accent)';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  } catch(e) { console.error('executeReschedule:', e); }
+    openRescheduleStep(b.service || '');
+  } catch (e) {
+    console.error('executeReschedule:', e);
+  }
 }
 
-
-
-let cancelDocId = null;
-
+// ── CANCEL / RESCHEDULE LINK PAGE ──
 async function checkCancelLink() {
   const params = new URLSearchParams(window.location.search);
   const bookingId = params.get('cancel') || params.get('reschedule');
@@ -2628,30 +2541,43 @@ async function checkCancelLink() {
   document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
   document.getElementById('step-cancel').classList.add('active');
   document.getElementById('cancel-page-title').textContent = isReschedule
-    ? (currentLang==='fr' ? 'Reporter le Rendez-vous' : 'Reschedule Appointment')
-    : (currentLang==='fr' ? 'Annuler la Réservation' : 'Cancel Booking');
+    ? (currentLang === 'fr' ? 'Reporter le Rendez-vous' : 'Reschedule Appointment')
+    : (currentLang === 'fr' ? 'Annuler la Réservation' : 'Cancel Booking');
 
-  // Hide reschedule button if this is cancel-only
   const rescheduleBtn = document.getElementById('btn-do-reschedule');
-  if (!isReschedule && rescheduleBtn) rescheduleBtn.style.display = 'none';
   const cancelBtn = document.getElementById('btn-do-cancel');
+  if (!isReschedule && rescheduleBtn) rescheduleBtn.style.display = 'none';
   if (isReschedule && cancelBtn) cancelBtn.style.display = 'none';
 
   try {
-    const snap = await db.collection('bookings').where('bookingId','==',bookingId).limit(1).get();
-    if (snap.empty) { document.getElementById('cancel-page-sub').textContent = currentLang==='fr'?'Réservation introuvable.':'Booking not found.'; return; }
-    const doc = snap.docs[0]; const b = doc.data(); cancelDocId = doc.id;
-    const hoursUntil = (bookingDateTime(b.date, b.time) - new Date()) / 36e5;
-    if (b.status === 'cancelled') { document.getElementById('cancel-page-sub').textContent = currentLang==='fr'?'Déjà annulée.':'Already cancelled.'; return; }
-    if (hoursUntil < 24) {
-      document.getElementById('cancel-page-sub').textContent = currentLang==='fr'
-        ?'Modification impossible moins de 24h avant le rendez-vous.'
-        :'Changes not possible less than 24h before the appointment.';
+    const snap = await db.collection('bookings').where('bookingId', '==', bookingId).limit(1).get();
+    if (snap.empty) {
+      document.getElementById('cancel-page-sub').textContent = currentLang === 'fr' ? 'Réservation introuvable.' : 'Booking not found.';
       return;
     }
+
+    const doc = snap.docs[0];
+    const b = doc.data();
+    cancelDocId = doc.id;
+
+    const hoursUntil = (bookingDateTime(b.date, b.time) - new Date()) / 36e5;
+
+    if (b.status === 'cancelled') {
+      document.getElementById('cancel-page-sub').textContent = currentLang === 'fr' ? 'Déjà annulée.' : 'Already cancelled.';
+      return;
+    }
+
+    if (hoursUntil < 24) {
+      document.getElementById('cancel-page-sub').textContent = currentLang === 'fr'
+        ? 'Modification impossible moins de 24h avant le rendez-vous.'
+        : 'Changes not possible less than 24h before the appointment.';
+      return;
+    }
+
     document.getElementById('cancel-page-sub').textContent = isReschedule
-      ? (currentLang==='fr'?'Voulez-vous choisir un nouveau créneau ?':'Would you like to pick a new date & time?')
-      : (currentLang==='fr'?'Voulez-vous annuler cette réservation ?':'Do you want to cancel this booking?');
+      ? (currentLang === 'fr' ? 'Voulez-vous choisir un nouveau créneau ?' : 'Would you like to pick a new date & time?')
+      : (currentLang === 'fr' ? 'Voulez-vous annuler cette réservation ?' : 'Do you want to cancel this booking?');
+
     const details = document.getElementById('cancel-booking-details');
     details.style.display = 'block';
     details.innerHTML = `
@@ -2659,18 +2585,25 @@ async function checkCancelLink() {
       <div class="summary-row"><div class="summary-key">Date</div><div class="summary-val">${formatDisplayDate(b.date)}</div></div>
       <div class="summary-row"><div class="summary-key">Time</div><div class="summary-val">${b.time}</div></div>
       <div class="summary-row"><div class="summary-key">Vehicle</div><div class="summary-val">${b.car}</div></div>
-      <div class="summary-row"><div class="summary-key">Price</div><div class="summary-val price">${b.price}</div></div>`;
+      <div class="summary-row"><div class="summary-key">Price</div><div class="summary-val price">${b.price}</div></div>
+    `;
+
     document.getElementById('cancel-actions').style.display = 'block';
-  } catch(e) { document.getElementById('cancel-page-sub').textContent = 'Error loading booking.'; }
+  } catch (e) {
+    document.getElementById('cancel-page-sub').textContent = 'Error loading booking.';
+  }
 }
 
 async function executeCancellation() {
   if (!cancelDocId) return;
+
   const btn = document.getElementById('btn-do-cancel');
-  btn.disabled = true; btn.textContent = '...';
+  btn.disabled = true;
+  btn.textContent = '...';
+
   try {
     await db.collection('bookings').doc(cancelDocId).update({ status: 'cancelled' });
-    // Free up slot in localStorage
+
     const bSnap = await db.collection('bookings').doc(cancelDocId).get();
     if (bSnap.exists) {
       const bData = bSnap.data();
@@ -2678,30 +2611,41 @@ async function executeCancellation() {
       const updated = local.filter(s => !(s.date === bData.date && s.time === bData.time));
       localStorage.setItem(BOOKINGS_KEY, JSON.stringify(updated));
 
-      // Generate and show cancellation ICS
       const cancelICS = generateCancellationICS(bData);
       const cancelICSUrl = createICSDownloadUrl(cancelICS);
-      showCancelICSButton(cancelICSUrl, cancelICS);
+      showCancelICSButton(cancelICSUrl);
     }
+
     document.getElementById('cancel-booking-details').style.display = 'none';
-    const result = document.getElementById('cancel-result'); result.style.display = 'block';
-    result.innerHTML = `<div style="color:var(--green);font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;margin-top:16px;">
-      ${currentLang==='fr'?'✓ Réservation annulée':'✓ Booking Cancelled'}</div>
-    <div style="color:var(--muted);font-size:0.82rem;margin-top:8px;">
-      ${currentLang==='fr'?'Votre créneau a été libéré.':'Your time slot has been freed up.'}</div>`;
-  } catch(e) { btn.disabled = false; btn.textContent = currentLang==='fr'?'Oui, annuler':'Yes, Cancel'; }
+    const result = document.getElementById('cancel-result');
+    result.style.display = 'block';
+    result.innerHTML = `
+      <div style="color:var(--green);font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;margin-top:16px;">
+        ${currentLang === 'fr' ? '✓ Réservation annulée' : '✓ Booking Cancelled'}
+      </div>
+      <div style="color:var(--muted);font-size:0.82rem;margin-top:8px;">
+        ${currentLang === 'fr' ? 'Votre créneau a été libéré.' : 'Your time slot has been freed up.'}
+      </div>
+    `;
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = currentLang === 'fr' ? 'Oui, annuler' : 'Yes, Cancel';
+  }
 }
 
-const ACCOUNTS_KEY = 'was_accounts';
-
+// ── REGISTER ──
 function checkRegister() {
   const p1 = document.getElementById('reg-password').value;
   const p2 = document.getElementById('reg-password2').value;
   document.getElementById('btn-register').disabled = !(p1.length >= 6 && p1 === p2);
+
   const err = document.getElementById('reg-error');
   if (p2.length > 0 && p1 !== p2) {
-    err.textContent = 'Passwords do not match.'; err.style.display = 'block';
-  } else { err.style.display = 'none'; }
+    err.textContent = 'Passwords do not match.';
+    err.style.display = 'block';
+  } else {
+    err.style.display = 'none';
+  }
 }
 
 function registerAccount() {
@@ -2712,22 +2656,22 @@ function registerAccount() {
   if (accounts[email]) {
     const err = document.getElementById('reg-error');
     err.textContent = 'An account with this email already exists.';
-    err.style.display = 'block'; return;
+    err.style.display = 'block';
+    return;
   }
 
   accounts[email] = {
-    fname:  document.getElementById('f-fname').value,
-    lname:  document.getElementById('f-lname').value,
-    phone:  document.getElementById('f-phone').value,
-    brand:  document.getElementById('f-brand').value,
-    model:  document.getElementById('f-model').value,
-    size:   document.getElementById('f-size').value,
-    notes:  document.getElementById('f-notes').value,
-    // simple hash — not for production security, just for local demo
+    fname: document.getElementById('f-fname').value,
+    lname: document.getElementById('f-lname').value,
+    phone: document.getElementById('f-phone').value,
+    brand: document.getElementById('f-brand').value,
+    model: document.getElementById('f-model').value,
+    size: document.getElementById('f-size').value,
+    notes: document.getElementById('f-notes').value,
     pw: btoa(password)
   };
-  localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
 
+  localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
   document.getElementById('register-form-wrap').style.display = 'none';
   document.getElementById('register-success').style.display = 'block';
 }
@@ -2737,42 +2681,51 @@ function skipRegister() {
 }
 
 function tryAutoFill() {
-  // If returning user, pre-fill form from saved account
   const accounts = JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || '{}');
   const lastEmail = localStorage.getItem('was_last_email');
+
   if (lastEmail && accounts[lastEmail]) {
     const a = accounts[lastEmail];
-    document.getElementById('f-fname').value  = a.fname || '';
-    document.getElementById('f-lname').value  = a.lname || '';
-    document.getElementById('f-phone').value  = a.phone || '';
-    document.getElementById('f-email').value  = lastEmail;
+    document.getElementById('f-fname').value = a.fname || '';
+    document.getElementById('f-lname').value = a.lname || '';
+    document.getElementById('f-phone').value = a.phone || '';
+    document.getElementById('f-email').value = lastEmail;
+
     if (a.brand) {
       document.getElementById('f-brand').value = a.brand;
       onBrandChange();
       setTimeout(() => {
-        if (a.model) { document.getElementById('f-model').value = a.model; onModelChange(); }
+        if (a.model) {
+          document.getElementById('f-model').value = a.model;
+          onModelChange();
+        }
       }, 50);
     }
+
     checkStep1();
   }
 }
 
-
+// ── INIT ──
 loadConfig();
+
 if (cfg.ejsService && cfg.ejsTemplate && cfg.ejsTemplateCustomer && cfg.ejsPubkey) {
   document.getElementById('modal-overlay').classList.add('hidden');
   document.getElementById('config-banner').classList.add('hidden');
 }
-// Load saved language preference
+
 const savedLang = localStorage.getItem('was_lang') || 'en';
 currentLang = savedLang;
 document.getElementById('lang-en').classList.toggle('active', savedLang === 'en');
 document.getElementById('lang-fr').classList.toggle('active', savedLang === 'fr');
+
 applyTranslations();
 renderServiceCards();
+renderCalendar();
 tryAutoFill();
 checkCancelLink();
 </script>
+
 <!-- PWA Service Worker -->
 <script>
 if ('serviceWorker' in navigator) {
@@ -2785,3 +2738,4 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+          

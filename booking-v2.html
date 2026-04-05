@@ -1262,7 +1262,6 @@ async function checkCancelLink(){
     document.getElementById('cancel-page-sub').textContent=currentLang==='fr'?'Erreur de chargement.':'Error loading booking.';
   }
 }
-}
 async function executeCancellation(){
   if(!cancelDocId)return;
   const btn=document.getElementById('btn-do-cancel');btn.disabled=true;btn.textContent='...';

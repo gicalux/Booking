@@ -455,7 +455,7 @@
   </div>
 
   <div class="step-panel" id="step-cancel">
-    <div class="confirm-screen">
+    <div class="confirm-screen" style="min-height:60vh;display:flex;flex-direction:column;justify-content:center;">
       <div class="confirm-icon" style="border-color:var(--red);background:rgba(224,85,85,0.1);">
         <svg viewBox="0 0 32 32" fill="none" stroke="var(--red)" stroke-width="2.5"><line x1="8" y1="8" x2="24" y2="24"/><line x1="24" y1="8" x2="8" y2="24"/></svg>
       </div>
@@ -466,7 +466,6 @@
         <div class="btn-row" style="justify-content:center;flex-wrap:wrap;">
           <button class="btn btn-primary" id="btn-do-reschedule" onclick="executeReschedule()">📅 Reschedule</button>
           <button class="btn btn-danger" id="btn-do-cancel" onclick="executeCancellation()">✕ Cancel Booking</button>
-          <button class="btn btn-ghost" onclick="window.location.href=window.location.pathname">Keep Booking</button>
         </div>
       </div>
       <div id="cancel-result" style="display:none;"></div>
@@ -1213,24 +1212,51 @@ async function checkCancelLink(){
   const bookingId=params.get('cancel')||params.get('reschedule');
   const isReschedule=!!params.get('reschedule');
   if(!bookingId)return;
+
+  // Show cancel panel and scroll to top
   document.querySelectorAll('.step-panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('step-cancel').classList.add('active');
-  document.getElementById('cancel-page-title').textContent=isReschedule?(currentLang==='fr'?'Reporter le Rendez-vous':'Reschedule Appointment'):(currentLang==='fr'?'Annuler la Réservation':'Cancel Booking');
-  const rescheduleBtn=document.getElementById('btn-do-reschedule'),cancelBtn=document.getElementById('btn-do-cancel');
+  window.scrollTo({top:0,behavior:'smooth'});
+
+  document.getElementById('cancel-page-title').textContent=isReschedule
+    ?(currentLang==='fr'?'Reporter le Rendez-vous':'Reschedule Appointment')
+    :(currentLang==='fr'?'Annuler la Réservation':'Cancel Booking');
+  document.getElementById('cancel-page-sub').textContent=currentLang==='fr'?'Chargement…':'Loading…';
+
+  const rescheduleBtn=document.getElementById('btn-do-reschedule');
+  const cancelBtn=document.getElementById('btn-do-cancel');
   if(!isReschedule&&rescheduleBtn)rescheduleBtn.style.display='none';
   if(isReschedule&&cancelBtn)cancelBtn.style.display='none';
+
   try{
+    // Wait for Firebase to be ready
+    await new Promise(resolve=>setTimeout(resolve,500));
+
     const snap=await db.collection('bookings').where('bookingId','==',bookingId).limit(1).get();
     if(snap.empty){document.getElementById('cancel-page-sub').textContent=currentLang==='fr'?'Réservation introuvable.':'Booking not found.';return;}
     const doc=snap.docs[0];const b=doc.data();cancelDocId=doc.id;
     const hoursUntil=(bookingDateTime(b.date,b.time)-new Date())/36e5;
     if(b.status==='cancelled'){document.getElementById('cancel-page-sub').textContent=currentLang==='fr'?'Déjà annulée.':'Already cancelled.';return;}
     if(hoursUntil<24){document.getElementById('cancel-page-sub').textContent=currentLang==='fr'?'Modification impossible moins de 24h avant le rendez-vous.':'Changes not possible less than 24h before the appointment.';return;}
-    document.getElementById('cancel-page-sub').textContent=isReschedule?(currentLang==='fr'?'Voulez-vous choisir un nouveau créneau ?':'Would you like to pick a new date & time?'):(currentLang==='fr'?'Voulez-vous annuler cette réservation ?':'Do you want to cancel this booking?');
-    const details=document.getElementById('cancel-booking-details');details.style.display='block';
+
+    document.getElementById('cancel-page-sub').textContent=isReschedule
+      ?(currentLang==='fr'?'Voulez-vous choisir un nouveau créneau ?':'Would you like to pick a new date & time?')
+      :(currentLang==='fr'?'Voulez-vous annuler cette réservation ?':'Do you want to cancel this booking?');
+
+    const details=document.getElementById('cancel-booking-details');
+    details.style.display='block';
     details.innerHTML=`<div class="summary-row"><div class="summary-key">Service</div><div class="summary-val">${b.service}</div></div><div class="summary-row"><div class="summary-key">Date</div><div class="summary-val">${formatDisplayDate(b.date)}</div></div><div class="summary-row"><div class="summary-key">Time</div><div class="summary-val">${b.time}</div></div><div class="summary-row"><div class="summary-key">Vehicle</div><div class="summary-val">${b.car}</div></div><div class="summary-row"><div class="summary-key">Price</div><div class="summary-val price">${b.price}</div></div>`;
+
     document.getElementById('cancel-actions').style.display='block';
-  }catch(e){document.getElementById('cancel-page-sub').textContent='Error loading booking.';}
+
+    // Scroll to buttons so they're visible on mobile
+    setTimeout(()=>document.getElementById('cancel-actions').scrollIntoView({behavior:'smooth',block:'center'}),300);
+
+  }catch(e){
+    console.error('checkCancelLink:',e);
+    document.getElementById('cancel-page-sub').textContent=currentLang==='fr'?'Erreur de chargement.':'Error loading booking.';
+  }
+}
 }
 async function executeCancellation(){
   if(!cancelDocId)return;
@@ -1276,7 +1302,9 @@ applyTranslations();
 renderServiceCards();
 renderCalendar();
 tryAutoFill();
-checkCancelLink();
+
+// Delay checkCancelLink so Firebase finishes initializing first
+setTimeout(checkCancelLink, 800);
 </script>
 <script>
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').then(()=>console.log('SW registered')).catch(e=>console.log('SW failed:',e));});}

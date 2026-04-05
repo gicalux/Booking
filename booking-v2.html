@@ -1234,10 +1234,7 @@ async function checkCancelLink(){
   if(isReschedule&&cancelBtn)cancelBtn.style.display='none';
 
   try{
-    // Wait for Firebase to be ready
-    await new Promise(resolve=>setTimeout(resolve,500));
-
-    const snap=await db.collection('bookings').where('bookingId','==',bookingId).limit(1).get();
+    const snap=await db.collection('bookings').where('bookingId','==',bookingId).limit(1).get({source:'server'});
     if(snap.empty){document.getElementById('cancel-page-sub').textContent=currentLang==='fr'?'Réservation introuvable.':'Booking not found.';return;}
     const doc=snap.docs[0];const b=doc.data();cancelDocId=doc.id;
     const hoursUntil=(bookingDateTime(b.date,b.time)-new Date())/36e5;
@@ -1307,8 +1304,7 @@ renderServiceCards();
 renderCalendar();
 tryAutoFill();
 
-// Delay checkCancelLink so Firebase finishes initializing first
-setTimeout(checkCancelLink, 800);
+checkCancelLink();
 </script>
 <script>
 if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').then(()=>console.log('SW registered')).catch(e=>console.log('SW failed:',e));});}
